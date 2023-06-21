@@ -4,8 +4,11 @@ const CopyPlugin = require("copy-webpack-plugin")
 
 module.exports = {
     entry: {
-        index: "./src/index.tsx"
+        index: "./src/index.tsx",
+        devtools: "./src/devtools/index.ts",
+        panel: "./src/devtools/panel.tsx"
     },
+    devtool: "source-map",
     mode: "production",
     module: {
         rules: [
@@ -37,7 +40,7 @@ module.exports = {
                 { from: "manifest.json", to: "../manifest.json" },
             ],
         }),
-        ...getHtmlPlugins(["index"]),
+        ...getHtmlPlugins(["index", "devtools", "panel"]),
     ],
     resolve: {
         extensions: [".tsx", ".ts", ".js"],
@@ -52,7 +55,7 @@ function getHtmlPlugins(chunks) {
     return chunks.map(
         (chunk) =>
             new HTMLPlugin({
-                title: "React extension",
+                title: `React extension - ${chunk}`,
                 filename: `${chunk}.html`,
                 chunks: [chunk],
             })
