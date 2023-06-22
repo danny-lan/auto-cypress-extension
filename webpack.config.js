@@ -6,7 +6,9 @@ module.exports = {
     entry: {
         index: "./src/index.tsx",
         devtools: "./src/devtools/index.ts",
-        panel: "./src/devtools/panel.tsx"
+        panel: "./src/devtools/panel.tsx",
+        content: "./src/content.js",
+        inject: "./src/inject.js"
     },
     devtool: "source-map",
     mode: "production",
