@@ -4,7 +4,12 @@ export type NetworkRequestParam = {
 };
 
 export type NetworkRequest = {
+  id: string;
+  url: string;
   requestQuery: NetworkRequestParam[];
   requestBody: NetworkRequestParam[] | undefined;
-  responseBody: any;
+  response: {
+    status: number;
+    body: any;
+  };
 };
