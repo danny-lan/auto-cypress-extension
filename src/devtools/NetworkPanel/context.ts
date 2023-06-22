@@ -4,7 +4,7 @@ import { NetworkRequest } from "../types";
 // Create a context
 const NetworkPanelContext = createContext<{
   requests: NetworkRequest[];
-  selectedRequests: Record<string, boolean>;
+  selectedRequests: Record<string, NetworkRequest>;
 }>({
   requests: [],
   selectedRequests: {},
