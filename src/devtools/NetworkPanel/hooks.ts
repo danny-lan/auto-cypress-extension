@@ -1,5 +1,5 @@
 import { TNetworkPanelView, TNetworkRequest } from "../types";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 export function useNetworkPanelState() {
   const [requests, setRequests] = useState<TNetworkRequest[]>([]);
@@ -16,12 +16,15 @@ export function useNetworkPanelState() {
   const [selectedResponseBodyKeys, setSelectedResponseBodyKeys] = useState<
     Record<string, boolean>
   >({});
+  const selectedRequestList = useMemo(() => {
+    return requests.filter((req) => !!selectedRequests[req.id]);
+  }, [requests, selectedRequests]);
 
   function confirmRequestSelection() {
     setView("match");
   }
 
-  function cancelSelection() {
+  function cancelRequestSelection() {
     setView("list");
     setSelectedRequestQueryKeys({});
     setSelectedRequestBodyKeys({});
@@ -29,7 +32,7 @@ export function useNetworkPanelState() {
   }
 
   function confirmKeySelection() {
-    setView("command");
+    setView("result");
   }
 
   return {
@@ -37,6 +40,7 @@ export function useNetworkPanelState() {
     setRequests,
     selectedRequests,
     setSelectedRequests,
+    selectedRequestList,
     selectedRequestQueryKeys,
     setSelectedRequestQueryKeys,
     selectedRequestBodyKeys,
@@ -44,8 +48,9 @@ export function useNetworkPanelState() {
     selectedResponseBodyKeys,
     setSelectedResponseBodyKeys,
     confirmRequestSelection,
-    cancelSelection,
+    cancelRequestSelection,
     confirmKeySelection,
+    cancelKeySelection: confirmRequestSelection,
     view,
   };
 }

@@ -7,6 +7,7 @@ const NetworkPanelContext = createContext<{
   setRequests: (requests: TNetworkRequest[]) => void;
   selectedRequests: Record<string, TNetworkRequest>;
   setSelectedRequests: (selected: Record<string, TNetworkRequest>) => void;
+  selectedRequestList: TNetworkRequest[],
   selectedRequestQueryKeys: Record<string, boolean>;
   selectedRequestBodyKeys: Record<string, boolean>;
   selectedResponseBodyKeys: Record<string, boolean>;
@@ -14,13 +15,15 @@ const NetworkPanelContext = createContext<{
   setSelectedRequestBodyKeys: (requestBodyKeys: Record<string, boolean>) => void;
   setSelectedResponseBodyKeys: (responseBodyKeys: Record<string, boolean>) => void;
   confirmRequestSelection: () => void;
-  cancelSelection: () => void;
+  cancelRequestSelection: () => void;
   confirmKeySelection: () => void;
+  cancelKeySelection: () => void;
 }>({
   requests: [],
   setRequests: () => null,
   selectedRequests: {},
   setSelectedRequests: () => null,
+  selectedRequestList: [],
   selectedRequestQueryKeys: {},
   selectedRequestBodyKeys: {},
   selectedResponseBodyKeys: {},
@@ -28,8 +31,9 @@ const NetworkPanelContext = createContext<{
   setSelectedRequestBodyKeys: () => null,
   setSelectedResponseBodyKeys: () => null,
   confirmRequestSelection: () => null,
-  cancelSelection: () => null,
+  cancelRequestSelection: () => null,
   confirmKeySelection: () => null,
+  cancelKeySelection: () => null,
 });
 
 export const NetworkPanelContextProvider = NetworkPanelContext.Provider;

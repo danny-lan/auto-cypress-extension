@@ -19,9 +19,8 @@ import NetworkPanelButton from "./NetworkPanelButton";
 const NetworkStubMatcherPicker: React.FC = () => {
   const theme = useTheme();
   const {
-    requests,
-    selectedRequests,
-    cancelSelection,
+    selectedRequestList,
+    cancelRequestSelection,
     selectedRequestQueryKeys,
     selectedRequestBodyKeys,
     selectedResponseBodyKeys,
@@ -30,10 +29,6 @@ const NetworkStubMatcherPicker: React.FC = () => {
     setSelectedResponseBodyKeys,
     confirmKeySelection,
   } = useNetworkPanelContext();
-
-  const selectedRequestList = useMemo(() => {
-    return requests.filter((req) => !!selectedRequests[req.id]);
-  }, [requests, selectedRequests]);
 
   const firstRequest = useMemo(
     () => selectedRequestList[0],
@@ -175,7 +170,7 @@ const NetworkStubMatcherPicker: React.FC = () => {
       <Flex justifyContent="space-between">
         <Button
           leftIcon={<ArrowBackIcon />}
-          onClick={cancelSelection}
+          onClick={cancelRequestSelection}
           color={theme.colors.red[400]}
         >
           Cancel

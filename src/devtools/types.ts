@@ -1,4 +1,4 @@
-export type TNetworkPanelView = 'list' | 'match' | 'command';
+export type TNetworkPanelView = 'list' | 'match' | 'result';
 
 export type TNetworkRequestParam = {
   name: string;

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { nanoid } from "nanoid";
 import { getTerminalFieldsAndValues } from "../utils";
-import { TNetworkPanelView, TNetworkRequest } from "../types";
 import { NetworkPanelContextProvider } from "./context";
 import NetworkRequestList from "./NetworkRequestList";
 import NetworkStubMatcherPicker from "./NetworkStubMatcherPicker";
 import { useNetworkPanelState } from "./hooks";
+import NetworkRequestModelResult from "./NetworkRequestModelResult";
 
 const NetworkPanel = () => {
   const state = useNetworkPanelState();
@@ -48,12 +48,7 @@ const NetworkPanel = () => {
     } else if (view === "match") {
       return <NetworkStubMatcherPicker />;
     }
-    console.log(
-      state.selectedRequestQueryKeys,
-      state.selectedRequestBodyKeys,
-      state.selectedResponseBodyKeys
-    );
-    return null;
+    return <NetworkRequestModelResult />;
   }
 
   return (

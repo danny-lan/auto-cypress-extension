@@ -30,7 +30,6 @@ const NetworkRequestList = () => {
     search
   );
   const theme = useTheme();
-  console.log(theme.colors);
 
   return (
     <Flex id="network-panel" direction="column" w="100vw" h="100vh">
