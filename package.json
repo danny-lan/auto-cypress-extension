@@ -32,7 +32,8 @@
   },
   "scripts": {
     "build": "webpack --config webpack.config.js",
-    "watch": "webpack -w --config webpack.config.js"
+    "watch": "webpack -w --config webpack.config.js",
+    "file-server": "node ./src/server/index.js"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.237",
