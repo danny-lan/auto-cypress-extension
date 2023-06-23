@@ -1,6 +1,6 @@
-import { NetworkRequest } from "../types";
+import { TNetworkRequest } from "../types";
 
-export default function getPrompt(requests: NetworkRequest[]) {
+export default function getPrompt(requests: TNetworkRequest[]) {
   if (!requests.length) return undefined;
   const url = requests[0].url;
   return `

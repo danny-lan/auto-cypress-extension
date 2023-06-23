@@ -1,6 +1,6 @@
 import { Configuration, OpenAIApi } from "openai";
 import get from "lodash/get";
-import { NetworkRequestParam } from "./types";
+import { TNetworkRequestParam } from "./types";
 
 const configuration = new Configuration({
   apiKey: "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",
@@ -31,9 +31,21 @@ export function getTerminalFieldsAndValues(obj: any) {
   }));
 }
 
+export function removeFromObject(obj: Record<string, any>, key: string) {
+  return Object.fromEntries(Object.entries(obj).filter(([k]) => k !== key));
+}
+
+export function safeJsonParse(str: any) {
+  try {
+    return JSON.parse(str);
+  } catch (e) {
+    return undefined;
+  }
+}
+
 export async function requestFromAI(
-  requestQuery: NetworkRequestParam[],
-  requestBody: NetworkRequestParam[] | undefined,
+  requestQuery: TNetworkRequestParam[],
+  requestBody: TNetworkRequestParam[] | undefined,
   responseBody: any
 ) {
   // const chatCompletion = await openai.createChatCompletion({

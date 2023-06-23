@@ -1,10 +1,11 @@
 import React, { useMemo } from "react";
-import { NetworkRequest } from "../types";
-import { Box, Button, Flex } from "@chakra-ui/react";
+import { TNetworkRequest } from "../types";
+import { Box, useTheme } from "@chakra-ui/react";
 import { CheckIcon } from "@chakra-ui/icons";
+import NetworkPanelButton from "./NetworkPanelButton";
 
 interface Props {
-  request: NetworkRequest;
+  request: TNetworkRequest;
   isSelected: boolean;
   onSelect: () => void;
   onDeselect: () => void;
@@ -21,15 +22,10 @@ const NetworkRequestListItem: React.FC<Props> = ({
 
   // @ts-ignore
   return (
-    <Button
-      onClick={() => (isSelected ? onDeselect() : onSelect())}
-      isActive={isSelected}
-      width="100%"
-      flexShrink={0}
-      justifyContent="flex-start"
-      gap={2}
-      px={2}
-      size="sm"
+    <NetworkPanelButton
+      isSelected={isSelected}
+      onSelect={onSelect}
+      onDeselect={onDeselect}
     >
       <Box flex="0 16px">
         {isSelected ? <CheckIcon boxSize="0.75em" /> : null}
@@ -41,7 +37,7 @@ const NetworkRequestListItem: React.FC<Props> = ({
         {method}
       </Box>
       <Box flex="0 48px">{response.status}</Box>
-    </Button>
+    </NetworkPanelButton>
   );
 };
 
