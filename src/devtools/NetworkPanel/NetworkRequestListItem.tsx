@@ -17,6 +17,7 @@ const NetworkRequestListItem: React.FC<Props> = ({
   onDeselect,
   onSelect,
 }) => {
+  const theme = useTheme();
   const { url, method, response } = request;
   const truncatedUrl = useMemo(() => url.split("/").at(-1), [url]);
 
@@ -30,7 +31,13 @@ const NetworkRequestListItem: React.FC<Props> = ({
       <Box flex="0 16px">
         {isSelected ? <CheckIcon boxSize="0.75em" /> : null}
       </Box>
-      <Box flex="1 0" textAlign="left" isTruncated={true}>
+      <Box
+        flex="1 0"
+        textAlign="left"
+        isTruncated={true}
+        title={url}
+        color={theme.colors.purple[200]}
+      >
         {truncatedUrl}
       </Box>
       <Box flex="0 48px" fontSize="sm">

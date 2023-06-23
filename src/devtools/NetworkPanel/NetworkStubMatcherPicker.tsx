@@ -1,20 +1,10 @@
 import React, { useMemo } from "react";
+import get from "lodash/get";
 import { useNetworkPanelContext } from "./context";
-import {
-  Box,
-  Button,
-  Flex,
-  Heading,
-  IconButton,
-  useTheme,
-} from "@chakra-ui/react";
-import { ArrowBackIcon, ArrowForwardIcon, CheckIcon } from "@chakra-ui/icons";
-import {
-  getTerminalFieldPaths,
-  removeFromObject,
-  safeJsonParse,
-} from "../utils";
-import NetworkPanelButton from "./NetworkPanelButton";
+import { Button, Flex, Heading, useTheme } from "@chakra-ui/react";
+import { ArrowBackIcon, ArrowForwardIcon } from "@chakra-ui/icons";
+import { getTerminalFieldPaths, safeJsonParse } from "../utils";
+import NetworkStubMatcherItem from "./NetworkStubMatcherItem";
 
 const NetworkStubMatcherPicker: React.FC = () => {
   const theme = useTheme();
@@ -30,10 +20,14 @@ const NetworkStubMatcherPicker: React.FC = () => {
     confirmKeySelection,
   } = useNetworkPanelContext();
 
-  const firstRequest = useMemo(
-    () => selectedRequestList[0],
-    [selectedRequestList]
-  );
+  const firstRequestValues = useMemo(() => {
+    const firstRequest = selectedRequestList[0];
+    return {
+      requestQuery: firstRequest.requestQuery,
+      requestBody: firstRequest.requestBody || [],
+      responseBody: safeJsonParse(firstRequest.response.body) || {},
+    };
+  }, [selectedRequestList]);
 
   const reqQueryKeys = useMemo<string[]>(() => {
     const keySet = new Set<string>();
@@ -69,30 +63,18 @@ const NetworkStubMatcherPicker: React.FC = () => {
         <Heading size="xs" color={theme.colors.yellow[400]} p={2}>
           Request Query Keys
         </Heading>
-        {reqQueryKeys.map((key) => {
-          const isSelected = selectedRequestQueryKeys[key];
-          return (
-            <NetworkPanelButton
-              isSelected={isSelected}
-              onSelect={() =>
-                setSelectedRequestQueryKeys({
-                  ...selectedRequestQueryKeys,
-                  [key]: true,
-                })
-              }
-              onDeselect={() =>
-                setSelectedRequestQueryKeys(
-                  removeFromObject(selectedRequestQueryKeys, key)
-                )
-              }
-            >
-              <Box flex="0 16px">
-                {isSelected ? <CheckIcon boxSize="0.75em" /> : null}
-              </Box>
-              <Box>{key}</Box>
-            </NetworkPanelButton>
-          );
-        })}
+        {reqQueryKeys.map((key) => (
+          <NetworkStubMatcherItem
+            matcherKey={key}
+            value={
+              firstRequestValues.requestQuery.find(
+                (query) => query.name === key
+              )!.value
+            }
+            selectedKeys={selectedRequestQueryKeys}
+            setSelectedKeys={setSelectedRequestQueryKeys}
+          />
+        ))}
       </>
     ) : null;
   }
@@ -103,30 +85,18 @@ const NetworkStubMatcherPicker: React.FC = () => {
         <Heading size="xs" color={theme.colors.yellow[400]} p={2} mt={2}>
           Request Body Keys
         </Heading>
-        {reqBodyKeys.map((key) => {
-          const isSelected = selectedRequestBodyKeys[key];
-          return (
-            <NetworkPanelButton
-              isSelected={isSelected}
-              onSelect={() =>
-                setSelectedRequestBodyKeys({
-                  ...selectedRequestBodyKeys,
-                  [key]: true,
-                })
-              }
-              onDeselect={() =>
-                setSelectedRequestBodyKeys(
-                  removeFromObject(selectedRequestBodyKeys, key)
-                )
-              }
-            >
-              <Box flex="0 16px">
-                {isSelected ? <CheckIcon boxSize="0.75em" /> : null}
-              </Box>
-              <Box>{key}</Box>
-            </NetworkPanelButton>
-          );
-        })}
+        {reqBodyKeys.map((key) => (
+          <NetworkStubMatcherItem
+            matcherKey={key}
+            value={
+              firstRequestValues.requestBody.find(
+                (param) => param.name === key
+              )!.value
+            }
+            selectedKeys={selectedRequestBodyKeys}
+            setSelectedKeys={setSelectedRequestBodyKeys}
+          />
+        ))}
       </>
     ) : null;
   }
@@ -137,30 +107,14 @@ const NetworkStubMatcherPicker: React.FC = () => {
         <Heading size="xs" color={theme.colors.yellow[400]} p={2} mt={2}>
           Response Body Keys
         </Heading>
-        {responseBodyKeys.map((key) => {
-          const isSelected = selectedResponseBodyKeys[key];
-          return (
-            <NetworkPanelButton
-              isSelected={isSelected}
-              onSelect={() =>
-                setSelectedResponseBodyKeys({
-                  ...selectedResponseBodyKeys,
-                  [key]: true,
-                })
-              }
-              onDeselect={() =>
-                setSelectedResponseBodyKeys(
-                  removeFromObject(selectedResponseBodyKeys, key)
-                )
-              }
-            >
-              <Box flex="0 16px">
-                {isSelected ? <CheckIcon boxSize="0.75em" /> : null}
-              </Box>
-              <Box>{key}</Box>
-            </NetworkPanelButton>
-          );
-        })}
+        {responseBodyKeys.map((key) => (
+          <NetworkStubMatcherItem
+            matcherKey={key}
+            value={get(firstRequestValues.responseBody, key)}
+            selectedKeys={selectedResponseBodyKeys}
+            setSelectedKeys={setSelectedResponseBodyKeys}
+          />
+        ))}
       </>
     ) : null;
   }
