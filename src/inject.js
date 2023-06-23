@@ -10,3 +10,7 @@ addEventListener('toPage', () => {
     detail: JSON.stringify(window.__REACT_DEVTOOLS_GLOBAL_HOOK__.reactDevtoolsAgent),
   }));
 });
+
+addEventListener('viewSelectedElement', e => {
+  console.log('viewSelectedElement', e.detail);
+});

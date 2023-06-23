@@ -17,13 +17,12 @@ chrome.runtime.onInstalled.addListener(function () {
 
 function sendSelectedElement(tabId) {
   // Send a message to the content script to get the selected element
-  chrome.tabs.sendMessage(tabId, "getSelectedElement", function (response) {
+  chrome.tabs.sendMessage(tabId, { action: "getSelectedElement" }, function (response) {
     if (response && response.selectedElement) {
       const selectedElement = JSON.parse(response.selectedElement);
-      console.log('JSONified selectedElement', selectedElement);
-      dispatchEvent(new CustomEvent('sendSelectedElement', {
-        detail: selectedElement,
-      }));
+
+      // Send data to background.js
+      chrome.runtime.sendMessage({ action: 'sendSelectedElement', data: selectedElement });
     }
   });
 }
@@ -33,11 +32,9 @@ function sendSelectedElement(tabId) {
 chrome.contextMenus.onClicked.addListener(function (info, tab) {
   if (info.menuItemId === "autoCypressAssertText") {
     console.log("autoCypressAssertText clicked!");
-    console.log(info);
     sendSelectedElement(tab.id);
   } else if (info.menuItemId === "autoCypressAssertExists") {
     console.log("autoCypressAssertExists clicked!");
-    console.log(info);
     sendSelectedElement(tab.id);
   }
 });

@@ -1,11 +1,29 @@
 console.log('content')
 
+// Get nested text content for asserting an element contains text
+function getNestedTextContent(element) {
+  let textContent = '';
+
+  for (let i = 0; i < element.childNodes.length; i++) {
+    const node = element.childNodes[i];
+
+    if (node.nodeType === Node.TEXT_NODE) {
+      textContent += node.textContent;
+    } else if (node.nodeType === Node.ELEMENT_NODE) {
+      textContent += getNestedTextContent(node);
+    }
+  }
+
+  return textContent;
+}
+
 // Can't directly convert to json or it will become [object Object]
 function elementToJSON(element) {
   const obj = {
     tagName: element.tagName,
     attributes: {},
-    innerHTML: element.innerHTML
+    innerHTML: element.innerHTML,
+    textContent: getNestedTextContent(element)
   };
 
   // Extract element attributes
@@ -17,24 +35,29 @@ function elementToJSON(element) {
   return JSON.stringify(obj);
 }
 
+// Save the clicked element to pass to extension
+window.addEventListener('contextmenu', function (event) {
+  window.clickedElement = event.target;
+});
 
 // Set up getSelectedElement call to get selected element when
 // context menu item clicked
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg === "getSelectedElement") {
+  if (msg.action === "getSelectedElement") {
     // Get the selected element
-    const selectedElement = window.getSelection().anchorNode.parentElement;
-    console.log('selectedElement', selectedElement);
-    const jsonEl = elementToJSON(selectedElement);
-    console.log(jsonEl)
+    console.log('selectedElement', window.clickedElement);
+    const selectedElement = elementToJSON(window.clickedElement);
 
-    sendResponse({ selectedElement: elementToJSON(selectedElement) });
+    sendResponse({ selectedElement: selectedElement });
+    dispatchEvent(new CustomEvent('viewSelectedElement', {
+      detail: selectedElement,
+    }));
   }
 });
 
 // Set up getWindow call for using react devtools global hook
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg === 'getWindow') {
+  if (msg.action === 'getWindow') {
     addEventListener('fromPage', e => {
       sendResponse(JSON.parse(e.detail));
     }, { once: true });
