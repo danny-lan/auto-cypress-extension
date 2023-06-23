@@ -47,6 +47,28 @@ export async function getFileContent(filePath: string) {
   }
 }
 
+export async function writeFileContent(filePath: string, content: string) {
+  try {
+    const response = await fetch(`http://localhost:3000/file`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ filePath, content }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('An error occurred while writing the file content', error);
+    throw error;
+  }
+}
+
 export function removeFromObject(obj: Record<string, any>, key: string) {
   return Object.fromEntries(Object.entries(obj).filter(([k]) => k !== key));
 }
