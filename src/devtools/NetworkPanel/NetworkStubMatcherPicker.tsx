@@ -120,7 +120,12 @@ const NetworkStubMatcherPicker: React.FC = () => {
   }
 
   return (
-    <Flex id="network-panel" direction="column" w="100vw" h="100vh">
+    <Flex
+      id="network-matcher-picker"
+      direction="column"
+      flex="1 0"
+      overflowY="auto"
+    >
       <Flex justifyContent="space-between">
         <Button
           leftIcon={<ArrowBackIcon />}

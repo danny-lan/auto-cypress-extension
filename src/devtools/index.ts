@@ -1,3 +1,3 @@
-chrome.devtools.panels.create("MyPanel", "", 'js/panel.html');
+chrome.devtools.panels.create("Auto Cypress", "", 'js/panel.html');
 
 export {};

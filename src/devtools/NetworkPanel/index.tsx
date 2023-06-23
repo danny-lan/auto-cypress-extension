@@ -1,61 +1,18 @@
-import React, { useEffect } from "react";
-import { nanoid } from "nanoid";
-import { getTerminalFieldsAndValues } from "../utils";
-import { NetworkPanelContextProvider } from "./context";
+import React from "react";
+import { useNetworkPanelContext } from "./context";
 import NetworkRequestList from "./NetworkRequestList";
 import NetworkStubMatcherPicker from "./NetworkStubMatcherPicker";
-import { useNetworkPanelState } from "./hooks";
 import NetworkRequestModelResult from "./NetworkRequestModelResult";
 
 const NetworkPanel = () => {
-  const state = useNetworkPanelState();
-  const { requests, setRequests, view } = state;
+  const { view } = useNetworkPanelContext();
 
-  useEffect(() => {
-    const callback: (request: chrome.devtools.network.Request) => void = (
-      request
-    ) => {
-      request.getContent(async (responseContent) => {
-        const { url, queryString: requestQuery } = request.request;
-        const requestBodyText = request.request.postData?.text;
-        const requestBody = requestBodyText
-          ? getTerminalFieldsAndValues(JSON.parse(requestBodyText))
-          : undefined;
-        setRequests([
-          ...requests,
-          {
-            id: nanoid(),
-            url,
-            requestQuery,
-            requestBody,
-            method: request.request.method,
-            response: {
-              status: request.response.status,
-              body: responseContent,
-            },
-          },
-        ]);
-      });
-    };
-    chrome.devtools.network.onRequestFinished.addListener(callback);
-    return () =>
-      chrome.devtools.network.onRequestFinished.removeListener(callback);
-  }, [requests]);
-
-  function renderView() {
-    if (view === "list") {
-      return <NetworkRequestList />;
-    } else if (view === "match") {
-      return <NetworkStubMatcherPicker />;
-    }
-    return <NetworkRequestModelResult />;
+  if (view === "list") {
+    return <NetworkRequestList />;
+  } else if (view === "match") {
+    return <NetworkStubMatcherPicker />;
   }
-
-  return (
-    <NetworkPanelContextProvider value={state}>
-      {renderView()}
-    </NetworkPanelContextProvider>
-  );
+  return <NetworkRequestModelResult />;
 };
 
 export default NetworkPanel;

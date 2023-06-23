@@ -12,7 +12,7 @@ import {
 import { DeleteIcon, SearchIcon } from "@chakra-ui/icons";
 import { useNetworkPanelContext } from "./context";
 import NetworkRequestListItem from "./NetworkRequestListItem";
-import { useFilteredNetworkRequests } from "./hooks";
+import { useFilteredNetworkRequests } from "../hooks";
 import { removeFromObject } from "../utils";
 
 const NetworkRequestList = () => {
@@ -32,7 +32,12 @@ const NetworkRequestList = () => {
   const theme = useTheme();
 
   return (
-    <Flex id="network-panel" direction="column" w="100vw" h="100vh">
+    <Flex
+      id="network-request-list"
+      direction="column"
+      flex="1 0"
+      overflowY="auto"
+    >
       <Flex>
         <IconButton
           aria-label="Clear"

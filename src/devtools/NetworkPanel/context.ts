@@ -1,24 +1,12 @@
 import React, { createContext, useContext } from "react";
-import { TNetworkPanelView, TNetworkRequest } from "../types";
+import {
+  TNetworkPanelContext,
+  TNetworkPanelView,
+  TNetworkRequest
+} from "../types";
 
 // Create a context
-const NetworkPanelContext = createContext<{
-  requests: TNetworkRequest[];
-  setRequests: (requests: TNetworkRequest[]) => void;
-  selectedRequests: Record<string, TNetworkRequest>;
-  setSelectedRequests: (selected: Record<string, TNetworkRequest>) => void;
-  selectedRequestList: TNetworkRequest[],
-  selectedRequestQueryKeys: Record<string, boolean>;
-  selectedRequestBodyKeys: Record<string, boolean>;
-  selectedResponseBodyKeys: Record<string, boolean>;
-  setSelectedRequestQueryKeys: (requestQueryKeys: Record<string, boolean>) => void;
-  setSelectedRequestBodyKeys: (requestBodyKeys: Record<string, boolean>) => void;
-  setSelectedResponseBodyKeys: (responseBodyKeys: Record<string, boolean>) => void;
-  confirmRequestSelection: () => void;
-  cancelRequestSelection: () => void;
-  confirmKeySelection: () => void;
-  cancelKeySelection: () => void;
-}>({
+const NetworkPanelContext = createContext<TNetworkPanelContext>({
   requests: [],
   setRequests: () => null,
   selectedRequests: {},
@@ -34,6 +22,7 @@ const NetworkPanelContext = createContext<{
   cancelRequestSelection: () => null,
   confirmKeySelection: () => null,
   cancelKeySelection: () => null,
+  view: "list",
 });
 
 export const NetworkPanelContextProvider = NetworkPanelContext.Provider;
