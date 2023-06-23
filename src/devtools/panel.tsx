@@ -1,11 +1,25 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import NetworkPanel from './NetworkPanel';
+import NetworkPanel from "./NetworkPanel";
+import { ChakraProvider, ColorModeScript, extendTheme } from "@chakra-ui/react";
+
+const theme = extendTheme({
+  config: {
+    initialColorMode: "dark",
+    useSystemColorMode: false,
+  },
+});
 
 const root = document.createElement("div");
 root.className = "container";
 document.body.appendChild(root);
 const rootDiv = ReactDOM.createRoot(root);
-rootDiv.render(<NetworkPanel />);
+
+rootDiv.render(
+  <ChakraProvider theme={theme}>
+    <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+    <NetworkPanel />
+  </ChakraProvider>
+);
 
 export {};
