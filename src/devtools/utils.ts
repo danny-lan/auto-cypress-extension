@@ -114,6 +114,7 @@ export async function requestNetworkInterceptFromOpenAI(
   requests: TNetworkRequest[]
 ) {
   const prompt = interceptPrompt(requests);
+  console.log(prompt);
   const chatCompletion = await requestFromOpenAI({
     openAIMethod: "createChatCompletion",
     requestBody: {
@@ -121,7 +122,8 @@ export async function requestNetworkInterceptFromOpenAI(
       messages: [{ role: "user", content: prompt }],
     },
   });
-  console.log(chatCompletion);
+
+  return chatCompletion.choices[0].message.content;
 }
 
 export async function requestFromOpenAI({

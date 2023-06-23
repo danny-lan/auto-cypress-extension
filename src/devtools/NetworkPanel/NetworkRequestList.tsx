@@ -97,6 +97,7 @@ const NetworkRequestList = () => {
         <Button
           color={theme.colors.green[400]}
           onClick={() => confirmRequestSelection()}
+          size="sm"
         >
           Stub
         </Button>
