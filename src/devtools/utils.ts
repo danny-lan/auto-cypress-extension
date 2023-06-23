@@ -1,11 +1,5 @@
-import { Configuration, OpenAIApi } from 'openai';
 import get from 'lodash/get';
 import { TNetworkRequestParam } from './types';
-
-const configuration = new Configuration({
-  apiKey: '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',
-});
-const openai = new OpenAIApi(configuration);
 
 export function getTerminalFieldPaths(obj: any, prefix = ''): string[] {
   let paths: string[] = [];
@@ -81,13 +75,20 @@ export function safeJsonParse(str: any) {
   }
 }
 
-export async function requestFromAI(
-  requestQuery: TNetworkRequestParam[],
-  requestBody: TNetworkRequestParam[] | undefined,
-  responseBody: any
-) {
-  // const chatCompletion = await openai.createChatCompletion({
-  //   model: 'gpt-3.5-turbo',
-  //   messages: [{ role: 'user', content: 'Write a poem about ducks' }]
-  // });
+export async function requestFromOpenAI({
+  openAIMethod,
+  requestBody,
+}: {
+  openAIMethod: string;
+  requestBody: any;
+}) {
+  const response = await fetch(`http://localhost:3010/open-ai`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ openAIMethod, requestBody }),
+  });
+
+  return response;
 }
