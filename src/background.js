@@ -11,3 +11,7 @@ document.body.addEventListener('click', async () => {
     });
   });
 })
+
+addEventListener('sendSelectedElement', e => {
+  console.log('sendSelectedElement', e.detail);
+}); 
