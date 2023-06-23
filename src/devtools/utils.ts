@@ -1,11 +1,13 @@
-import get from 'lodash/get';
+import get from "lodash/get";
+import { TNetworkRequest } from "./types";
+import interceptPrompt from "./prompts/intercept";
 
-export function getTerminalFieldPaths(obj: any, prefix = ''): string[] {
+export function getTerminalFieldPaths(obj: any, prefix = ""): string[] {
   let paths: string[] = [];
 
   for (let key in obj) {
     let newPath = prefix ? `${prefix}.${key}` : key;
-    if (typeof obj[key] === 'object') {
+    if (typeof obj[key] === "object") {
       paths = paths.concat(getTerminalFieldPaths(obj[key], newPath));
     } else {
       paths.push(newPath);
@@ -18,7 +20,7 @@ export function getTerminalFieldPaths(obj: any, prefix = ''): string[] {
 export function getTerminalFieldsAndValues(obj: any) {
   const terminalFields = getTerminalFieldPaths(obj);
 
-  return terminalFields.map(field => ({
+  return terminalFields.map((field) => ({
     name: field,
     value: get(obj, field),
   }));
@@ -35,7 +37,7 @@ export async function getFileContent(filePath: string) {
     const data = await response.text();
     return data;
   } catch (error) {
-    console.error('An error occurred while fetching the file content', error);
+    console.error("An error occurred while fetching the file content", error);
     throw error;
   }
 }
@@ -43,9 +45,9 @@ export async function getFileContent(filePath: string) {
 export async function writeFileContent(filePath: string, content: string) {
   try {
     const response = await fetch(`http://localhost:3000/file`, {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({ filePath, content }),
     });
@@ -57,7 +59,7 @@ export async function writeFileContent(filePath: string, content: string) {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('An error occurred while writing the file content', error);
+    console.error("An error occurred while writing the file content", error);
     throw error;
   }
 }
@@ -74,9 +76,11 @@ export function safeJsonParse(str: any) {
   }
 }
 
-
 type JsonObject = { [key: string]: any };
-export function pruneObject(jsonObject: JsonObject, keyPaths: string[]): JsonObject {
+export function pruneObject(
+  jsonObject: JsonObject,
+  keyPaths: string[]
+): JsonObject {
   const pruned: JsonObject = {};
 
   keyPaths.forEach((keyPath) => {
@@ -90,7 +94,7 @@ export function pruneObject(jsonObject: JsonObject, keyPaths: string[]): JsonObj
 }
 
 function setValueByPath(obj: JsonObject, path: string, value: any) {
-  const keys = path.split('.');
+  const keys = path.split(".");
   const lastKey = keys.pop();
   let currentObj: JsonObject = obj;
 
@@ -106,6 +110,20 @@ function setValueByPath(obj: JsonObject, path: string, value: any) {
   }
 }
 
+export async function requestNetworkInterceptFromOpenAI(
+  requests: TNetworkRequest[]
+) {
+  const prompt = interceptPrompt(requests);
+  const chatCompletion = await requestFromOpenAI({
+    openAIMethod: "createChatCompletion",
+    requestBody: {
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }],
+    },
+  });
+  console.log(chatCompletion);
+}
+
 export async function requestFromOpenAI({
   openAIMethod,
   requestBody,
@@ -114,12 +132,12 @@ export async function requestFromOpenAI({
   requestBody: any;
 }) {
   const response = await fetch(`http://localhost:3010/open-ai`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({ openAIMethod, requestBody }),
-  });
+  }).then(response => response.json());
 
   return response;
 }
