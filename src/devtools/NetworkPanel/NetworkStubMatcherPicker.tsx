@@ -126,6 +126,7 @@ const NetworkStubMatcherPicker: React.FC = () => {
           leftIcon={<ArrowBackIcon />}
           onClick={cancelRequestSelection}
           color={theme.colors.red[400]}
+          size="sm"
         >
           Cancel
         </Button>
@@ -138,6 +139,7 @@ const NetworkStubMatcherPicker: React.FC = () => {
             !Object.keys(selectedRequestBodyKeys).length
           }
           color={theme.colors.green[400]}
+          size="sm"
         >
           Confirm Keys
         </Button>

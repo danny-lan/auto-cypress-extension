@@ -24,5 +24,7 @@ ${JSON.stringify(
     response,
   }))
 )}
+
+Don't include the question or any explanations in your response.
 `;
 }
