@@ -1,4 +1,4 @@
-export type TNetworkPanelView = 'list' | 'match' | 'result';
+export type TNetworkPanelView = "list" | "match" | "result";
 
 export type TNetworkRequestParam = {
   name: string;
@@ -16,3 +16,32 @@ export type TNetworkRequest = {
     body: any;
   };
 };
+
+export type TPanelView = "actions" | "network";
+
+export type TNetworkPanelContext = {
+  requests: TNetworkRequest[];
+  setRequests: (requests: TNetworkRequest[]) => void;
+  selectedRequests: Record<string, TNetworkRequest>;
+  setSelectedRequests: (selected: Record<string, TNetworkRequest>) => void;
+  selectedRequestList: TNetworkRequest[];
+  selectedRequestQueryKeys: Record<string, boolean>;
+  selectedRequestBodyKeys: Record<string, boolean>;
+  selectedResponseBodyKeys: Record<string, boolean>;
+  setSelectedRequestQueryKeys: (
+    requestQueryKeys: Record<string, boolean>
+  ) => void;
+  setSelectedRequestBodyKeys: (
+    requestBodyKeys: Record<string, boolean>
+  ) => void;
+  setSelectedResponseBodyKeys: (
+    responseBodyKeys: Record<string, boolean>
+  ) => void;
+  confirmRequestSelection: () => void;
+  cancelRequestSelection: () => void;
+  confirmKeySelection: () => void;
+  cancelKeySelection: () => void;
+  view: TNetworkPanelView;
+};
+
+export type TActionsPanelContext = {};

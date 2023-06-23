@@ -1,7 +1,14 @@
-import { TNetworkPanelView, TNetworkRequest } from "../types";
-import { useMemo, useState } from "react";
+import {
+  TActionsPanelContext,
+  TNetworkPanelContext,
+  TNetworkPanelView,
+  TNetworkRequest,
+} from "./types";
+import { useEffect, useMemo, useState } from "react";
+import { getTerminalFieldsAndValues } from "./utils";
+import { nanoid } from "nanoid";
 
-export function useNetworkPanelState() {
+export function provideNetworkPanelContext(): TNetworkPanelContext {
   const [requests, setRequests] = useState<TNetworkRequest[]>([]);
   const [selectedRequests, setSelectedRequests] = useState<
     Record<string, TNetworkRequest>
@@ -19,6 +26,37 @@ export function useNetworkPanelState() {
   const selectedRequestList = useMemo(() => {
     return requests.filter((req) => !!selectedRequests[req.id]);
   }, [requests, selectedRequests]);
+
+  useEffect(() => {
+    const callback: (request: chrome.devtools.network.Request) => void = (
+      request
+    ) => {
+      request.getContent(async (responseContent) => {
+        const { url, queryString: requestQuery } = request.request;
+        const requestBodyText = request.request.postData?.text;
+        const requestBody = requestBodyText
+          ? getTerminalFieldsAndValues(JSON.parse(requestBodyText))
+          : undefined;
+        setRequests([
+          ...requests,
+          {
+            id: nanoid(),
+            url,
+            requestQuery,
+            requestBody,
+            method: request.request.method,
+            response: {
+              status: request.response.status,
+              body: responseContent,
+            },
+          },
+        ]);
+      });
+    };
+    chrome.devtools.network.onRequestFinished.addListener(callback);
+    return () =>
+      chrome.devtools.network.onRequestFinished.removeListener(callback);
+  }, [requests]);
 
   function confirmRequestSelection() {
     setView("match");
@@ -70,4 +108,8 @@ export function useFilteredNetworkRequests(
     });
   }
   return filteredBySearch;
+}
+
+export function provideActionsPanelContext(): TActionsPanelContext {
+  return {};
 }

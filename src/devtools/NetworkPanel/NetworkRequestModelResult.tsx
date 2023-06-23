@@ -97,10 +97,9 @@ const NetworkRequestModelResult: FC = () => {
 
   return (
     <Flex
-      id="network-panel"
+      id="network-request-model-result"
       direction="column"
-      w="100vw"
-      h="100vh"
+      flex="1 0"
       alignItems="stretch"
       overflow="auto"
     >
