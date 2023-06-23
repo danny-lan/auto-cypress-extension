@@ -1,9 +1,10 @@
 const ts = require('typescript');
 const prettier = require('prettier');
-const fs = require('fs')
+const fs = require('fs');
 const diff = require('diff');
 const { execSync } = require('child_process');
 const { stringTransformer } = require('./strategies');
+const { checkAndAddTestIdImport } = require('./import');
 
 // thanks chatgpt
 const runDiffCommand = (contentA, contentB) => {
@@ -15,9 +16,22 @@ const runDiffCommand = (contentA, contentB) => {
   require('fs').writeFileSync(tempFileA, contentA);
   require('fs').writeFileSync(tempFileB, contentB);
 
+  // Run the diff command, -B flag means we ignore blank line changes
+  const response = execSync(`diff -B ${tempFileA} ${tempFileB} || true`, {
+    encoding: 'utf8',
+  });
+  return response;
+};
+
+const runPatchCommand = (filepath, patch) => {
+  const tempFileA = '/tmp/patch.diff';
+  // Write contents to temporary files
+  require('fs').writeFileSync(tempFileA, patch);
+
   // Run the diff command
-  const response = execSync(`diff -B ${tempFileA} ${tempFileB} || true`, { encoding: 'utf8' });
-  console.log(response);
+  const response = execSync(`patch ${filepath} ${tempFileA}`, {
+    encoding: 'utf8',
+  });
   return response;
 };
 
@@ -26,9 +40,7 @@ const printer = ts.createPrinter({
   removeComments: false,
 });
 
-const strategies = [
-  stringTransformer,
-];
+const strategies = [stringTransformer];
 
 const applyStrategies = ({ sourceFile, props = {} }) => {
   const hasAppliedStrategyRef = { current: false };
@@ -36,9 +48,9 @@ const applyStrategies = ({ sourceFile, props = {} }) => {
   let result;
   for (let i = 0; i < strategies.length; i++) {
     const strategy = strategies[i];
-    result = ts.transform(
-      sourceFile, [ strategy({ hasAppliedStrategyRef, props }) ]
-    );
+    result = ts.transform(sourceFile, [
+      strategy({ hasAppliedStrategyRef, props, testId: 'foobarbaz' }),
+    ]);
     if (hasAppliedStrategyRef.current) break;
   }
 
@@ -59,16 +71,32 @@ const generatePatch = ({ filepath, props }) => {
     true,
     ts.ScriptKind.TSX
   );
-  
-  const { newSourceFile, hasAppliedStrategy } = applyStrategies({ sourceFile, props });
-  const newCode = prettier.format(
-    printer.printFile(newSourceFile),
-    { singleQuote: true, parser: 'typescript', arrowParens: 'avoid', trailingComma: 'es5' }
-  );
+
+  let { newSourceFile, hasAppliedStrategy } = applyStrategies({
+    sourceFile,
+    props,
+  });
+
+  if (hasAppliedStrategy) {
+    newSourceFile = checkAndAddTestIdImport(newSourceFile);
+  }
+
+  const newCode = prettier.format(printer.printFile(newSourceFile), {
+    singleQuote: true,
+    parser: 'typescript',
+    arrowParens: 'avoid',
+    trailingComma: 'es5',
+  });
 
   return runDiffCommand(src, newCode);
 };
 
+const applyPatch = ({ filepath, patch }) => {
+  if (!patch) return;
+  runPatchCommand(filepath, patch);
+};
+
 module.exports = {
   generatePatch,
+  applyPatch,
 };

@@ -1,4 +1,4 @@
-console.log('content')
+console.log('content');
 
 // Get nested text content for asserting an element contains text
 function getNestedTextContent(element) {
@@ -23,7 +23,7 @@ function elementToJSON(element) {
     tagName: element.tagName,
     attributes: {},
     innerHTML: element.innerHTML,
-    textContent: getNestedTextContent(element)
+    textContent: getNestedTextContent(element),
   };
 
   // Extract element attributes
@@ -43,29 +43,37 @@ window.addEventListener('contextmenu', function (event) {
 // Set up getSelectedElement call to get selected element when
 // context menu item clicked
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.action === "getSelectedElement") {
+  if (msg.action === 'getSelectedElement') {
     // Get the selected element
     console.log('selectedElement', window.clickedElement);
     const selectedElement = elementToJSON(window.clickedElement);
 
     sendResponse({ selectedElement: selectedElement });
-    dispatchEvent(new CustomEvent('viewSelectedElement', {
-      detail: selectedElement,
-    }));
+    dispatchEvent(
+      new CustomEvent('viewSelectedElement', {
+        detail: selectedElement,
+      })
+    );
   }
 });
 
 // Set up getWindow call for using react devtools global hook
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.action === 'getWindow') {
-    addEventListener('fromPage', e => {
-      sendResponse(JSON.parse(e.detail));
-    }, { once: true });
+    addEventListener(
+      'fromPage',
+      e => {
+        sendResponse(JSON.parse(e.detail));
+      },
+      { once: true }
+    );
     dispatchEvent(new Event('toPage'));
   }
 });
 
 var s = document.createElement('script');
 s.src = chrome.runtime.getURL('js/inject.js');
-s.onload = function () { this.remove(); };
+s.onload = function () {
+  this.remove();
+};
 (document.head || document.documentElement).appendChild(s);
