@@ -4,12 +4,27 @@
     "name": "Auto Cypress Extension",
     "action": {
         "default_popup": "js/index.html",
-        "default_title": "Auto Cypress Extension"
+        "default_title": "Auto Cypress Extension",
+        "default_icon": {
+            "48": "res/knight-small.png",
+            "128": "res/knight-large.png"
+        }
     },
     "devtools_page": "js/devtools.html",
+    "background": {
+      "service_worker": "js/contextMenu.js"
+    },
+    "content_scripts": [{
+        "matches": ["<all_urls>"],
+        "js": ["js/content.js"]
+    }],
     "web_accessible_resources": [{
         "matches": ["<all_urls>"],
         "resources": ["js/inject.js"]
     }],
-    "permissions": ["activeTab", "scripting"]
+    "permissions": ["activeTab", "scripting", "contextMenus"],
+    "icons": {
+        "48": "res/knight-small.png",
+        "128": "res/knight-large.png"
+    }
 }

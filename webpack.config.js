@@ -8,7 +8,8 @@ module.exports = {
         devtools: "./src/devtools/index.ts",
         panel: "./src/devtools/panel.tsx",
         content: "./src/content.js",
-        inject: "./src/inject.js"
+        inject: "./src/inject.js",
+        contextMenu: './src/contextMenu.js'
     },
     devtool: "source-map",
     mode: "production",
@@ -23,17 +24,16 @@ module.exports = {
                             compilerOptions: { noEmit: false },
                         }
                     }],
-                exclude: /node_modules/,
+                exclude: /node_modules/
             },
             {
-                exclude: /node_modules/,
                 test: /\.css$/i,
                 use: [
                     "style-loader",
                     "css-loader"
-                ]
-
-            },
+                ],
+                exclude: /node_modules/
+            }
         ],
     },
     plugins: [
@@ -42,10 +42,16 @@ module.exports = {
                 { from: "manifest.json", to: "../manifest.json" },
             ],
         }),
+        new CopyPlugin({
+            patterns: [{ from: 'res', to: "../res" }],
+        }),
         ...getHtmlPlugins(["index", "devtools", "panel"]),
     ],
     resolve: {
-        extensions: [".tsx", ".ts", ".js"],
+        extensions: [".tsx", ".ts", ".js", "*.png"],
+        alias: {
+            Res: path.resolve(__dirname, 'res/'),
+        },
     },
     output: {
         path: path.join(__dirname, "dist/js"),
