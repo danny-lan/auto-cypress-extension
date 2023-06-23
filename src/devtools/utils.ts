@@ -1,14 +1,11 @@
-import { Configuration, OpenAIApi } from "openai";
-import get from "lodash/get";
-import {TNetworkRequest} from "./types";
-import interceptPrompt from './prompts/intercept';
+import get from 'lodash/get';
 
-export function getTerminalFieldPaths(obj: any, prefix = ""): string[] {
+export function getTerminalFieldPaths(obj: any, prefix = ''): string[] {
   let paths: string[] = [];
 
   for (let key in obj) {
     let newPath = prefix ? `${prefix}.${key}` : key;
-    if (typeof obj[key] === "object") {
+    if (typeof obj[key] === 'object') {
       paths = paths.concat(getTerminalFieldPaths(obj[key], newPath));
     } else {
       paths.push(newPath);
@@ -21,10 +18,48 @@ export function getTerminalFieldPaths(obj: any, prefix = ""): string[] {
 export function getTerminalFieldsAndValues(obj: any) {
   const terminalFields = getTerminalFieldPaths(obj);
 
-  return terminalFields.map((field) => ({
+  return terminalFields.map(field => ({
     name: field,
     value: get(obj, field),
   }));
+}
+
+export async function getFileContent(filePath: string) {
+  try {
+    const response = await fetch(
+      `http://localhost:3010/file?filePath=${encodeURIComponent(filePath)}`
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.text();
+    return data;
+  } catch (error) {
+    console.error('An error occurred while fetching the file content', error);
+    throw error;
+  }
+}
+
+export async function writeFileContent(filePath: string, content: string) {
+  try {
+    const response = await fetch(`http://localhost:3000/file`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ filePath, content }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('An error occurred while writing the file content', error);
+    throw error;
+  }
 }
 
 export function removeFromObject(obj: Record<string, any>, key: string) {
@@ -38,6 +73,7 @@ export function safeJsonParse(str: any) {
     return undefined;
   }
 }
+
 
 type JsonObject = { [key: string]: any };
 export function pruneObject(jsonObject: JsonObject, keyPaths: string[]): JsonObject {
@@ -70,15 +106,20 @@ function setValueByPath(obj: JsonObject, path: string, value: any) {
   }
 }
 
-const configuration = new Configuration({
-  apiKey: "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",
-});
-const openai = new OpenAIApi(configuration);
-export async function requestFromAI(requests: TNetworkRequest[]) {
-  const prompt = interceptPrompt(requests);
-  const chatCompletion = await openai.createChatCompletion({
-    model: 'gpt-3.5-turbo',
-    messages: [{ role: 'user', content: prompt }]
+export async function requestFromOpenAI({
+  openAIMethod,
+  requestBody,
+}: {
+  openAIMethod: string;
+  requestBody: any;
+}) {
+  const response = await fetch(`http://localhost:3010/open-ai`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ openAIMethod, requestBody }),
   });
-  console.log(chatCompletion);
+
+  return response;
 }

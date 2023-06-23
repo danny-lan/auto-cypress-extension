@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { nanoid } from "nanoid";
 import { getTerminalFieldsAndValues } from "../utils";
 import { NetworkPanelContextProvider } from "./context";

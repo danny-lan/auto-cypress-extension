@@ -1,6 +1,6 @@
 import React, { FC, useEffect } from "react";
 import { useNetworkPanelContext } from "./context";
-import { pruneObject, requestFromAI, safeJsonParse } from "../utils";
+import { pruneObject, safeJsonParse } from "../utils";
 import { Button, Flex } from "@chakra-ui/react";
 import { ArrowBackIcon } from "@chakra-ui/icons";
 
@@ -31,9 +31,6 @@ const NetworkRequestModelResult: FC = () => {
         requestBody: prunedBody,
         response: { status: req.response.status, body: prunedResponse },
       };
-    });
-    requestFromAI(prunedRequests).then(code => {
-      console.log(code);
     });
   }, []);
 
