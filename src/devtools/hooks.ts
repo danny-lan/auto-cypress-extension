@@ -28,6 +28,13 @@ export function provideNetworkPanelContext(): TNetworkPanelContext {
   }, [requests, selectedRequests]);
 
   useEffect(() => {
+    console.log('chrome.runtime', chrome.runtime, chrome.runtime.onMessage)
+    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+      console.log('msg', msg);
+    });
+  }, []);
+
+  useEffect(() => {
     const callback: (request: chrome.devtools.network.Request) => void = (
       request
     ) => {

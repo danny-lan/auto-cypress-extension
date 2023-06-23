@@ -57,6 +57,15 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   }
 });
 
+addEventListener('myevent', e => {
+  console.log('received event', e);
+  const payload = {
+    type: 'click',
+    detail: e.detail,
+  };
+  chrome.runtime.sendMessage(`${JSON.stringify(payload)}`);
+});
+
 // Set up getWindow call for using react devtools global hook
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.action === 'getWindow') {

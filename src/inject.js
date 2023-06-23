@@ -145,10 +145,10 @@ const fn = async () => {
 
       console.log('dispatching event');
       dispatchEvent(
-        new CustomEvent('onClicka', {
+        new CustomEvent('myevent', {
           detail: JSON.stringify({
             sourceFile,
-            // details,
+            details,
           }),
         })
       );
