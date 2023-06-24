@@ -116,12 +116,14 @@ export function provideActionsPanelContext(): TActionsPanelContext {
 
   useEffect(() => {
     console.log("chrome.runtime", chrome.runtime, chrome.runtime.onMessage);
-    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+    const callback = (msg: string) => {
       const parsedMsg = JSON.parse(msg);
       const { details, sourceFile } = JSON.parse(parsedMsg.detail);
-      setActions([...actions, {type: parsedMsg.type, sourceFile, details }]);
-    });
-  }, []);
+      setActions([...actions, { type: parsedMsg.type, sourceFile, details }]);
+    };
+    chrome.runtime.onMessage.addListener(callback);
+    return () => chrome.runtime.onMessage.removeListener(callback);
+  }, [actions]);
 
   console.log(actions);
 
