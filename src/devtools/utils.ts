@@ -1,6 +1,7 @@
 import get from "lodash/get";
 import { TNetworkRequest } from "./types";
 import interceptPrompt from "./prompts/intercept";
+import writeTestPrompt from "./prompts/cypressTest";
 
 export function getTerminalFieldPaths(obj: any, prefix = ""): string[] {
   let paths: string[] = [];
@@ -114,6 +115,25 @@ export async function requestNetworkInterceptFromOpenAI(
   requests: TNetworkRequest[]
 ) {
   const prompt = interceptPrompt(requests);
+  console.log(prompt);
+  const chatCompletion = await requestFromOpenAI({
+    openAIMethod: "createChatCompletion",
+    requestBody: {
+      model: "gpt-3.5-turbo",
+      messages: [{ role: "user", content: prompt }],
+    },
+  });
+
+  return chatCompletion.choices[0].message.content;
+}
+
+export async function generateCypressTestFromOpenAI(params: {
+  title: string;
+  url: string;
+  intercepts: string;
+  items: { type: string, "data-testid": string, textContent: string, value: string, tagName: string }[];
+}) {
+  const prompt = writeTestPrompt(params);
   console.log(prompt);
   const chatCompletion = await requestFromOpenAI({
     openAIMethod: "createChatCompletion",
