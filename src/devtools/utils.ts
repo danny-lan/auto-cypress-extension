@@ -127,6 +127,18 @@ export async function requestNetworkInterceptFromOpenAI(
   return chatCompletion.choices[0].message.content;
 }
 
+// Example arguments:
+//  title:      'AI Hub Build Mode'
+//  url:        '/hub/apps/',
+//  intercepts: 'cy.intercept("blah blah")',
+//  items       "[
+//                 { "type": "assertExists", "data-testid": "create-app-button" },
+//                 { "type": "assertText", "data-testid": "create-app-button", "textContent": "Create App" },
+//                 { "type": "click", "data-testid": "create-app-button" },
+//                 { "type": "assertExists", "data-testid": "create-app-input" },
+//                 { "type": "keystroke", "data-testid": "create-app-input", "value": "a" },
+//              ]"
+
 export async function generateCypressTestFromOpenAI(params: {
   title: string;
   url: string;
