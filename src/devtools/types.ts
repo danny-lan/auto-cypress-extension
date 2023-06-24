@@ -44,4 +44,12 @@ export type TNetworkPanelContext = {
   view: TNetworkPanelView;
 };
 
-export type TActionsPanelContext = {};
+export type TAction = {
+  type: "click" | "keyboard" | "assert";
+  sourceFile: string;
+  details: { nodes: any[]; props: Record<string, any> };
+};
+
+export type TActionsPanelContext = {
+  actions: TAction[];
+};

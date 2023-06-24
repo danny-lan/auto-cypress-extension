@@ -1,4 +1,5 @@
 import {
+  TAction,
   TActionsPanelContext,
   TNetworkPanelContext,
   TNetworkPanelView,
@@ -26,13 +27,6 @@ export function provideNetworkPanelContext(): TNetworkPanelContext {
   const selectedRequestList = useMemo(() => {
     return requests.filter((req) => !!selectedRequests[req.id]);
   }, [requests, selectedRequests]);
-
-  useEffect(() => {
-    console.log('chrome.runtime', chrome.runtime, chrome.runtime.onMessage)
-    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-      console.log('msg', msg);
-    });
-  }, []);
 
   useEffect(() => {
     const callback: (request: chrome.devtools.network.Request) => void = (
@@ -118,5 +112,20 @@ export function useFilteredNetworkRequests(
 }
 
 export function provideActionsPanelContext(): TActionsPanelContext {
-  return {};
+  const [actions, setActions] = useState<TAction[]>([]);
+
+  useEffect(() => {
+    console.log("chrome.runtime", chrome.runtime, chrome.runtime.onMessage);
+    chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+      const parsedMsg = JSON.parse(msg);
+      const { details, sourceFile } = JSON.parse(parsedMsg.detail);
+      setActions([...actions, {type: parsedMsg.type, sourceFile, details }]);
+    });
+  }, []);
+
+  console.log(actions);
+
+  return {
+    actions,
+  };
 }
