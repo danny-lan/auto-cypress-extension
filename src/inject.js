@@ -24,7 +24,7 @@ const getElementToFiberId = (element, n = 10) => {
   console.warn = consoleLog.bind(console);
 
   // It's possble the element clicked is not tracked for some reason, so let's check the parent
-  if (!foundId) {
+  if (!foundId && element.parentElement) {
     return getElementToFiberId(element.parentElement, n - 1);
   }
 
