@@ -132,6 +132,10 @@ const getPathToSourceFile = (componentToFind, scriptContents) => {
 };
 
 const safeDispatchEvent = (eventName, payload) => {
+  // Don't record events if we're not recording
+  const isRecording = JSON.parse(localStorage.getItem('isRecording'));
+  if (!isRecording) return;
+
   const safeStringify = obj => {
     return JSON.stringify(obj, function (key, value) {
       // we might not need "nodes" either?
@@ -167,8 +171,6 @@ const safeDispatchEvent = (eventName, payload) => {
   });
 
   addEventListener('keydown', e => {
-    console.log('keydown', e);
-
     let text;
     switch (e.key) {
       case 'Shift':
@@ -205,15 +207,18 @@ const safeDispatchEvent = (eventName, payload) => {
   });
 
   addEventListener('startRecording', e => {
+    localStorage.setItem('isRecording', true);
     safeDispatchEvent('startRecordingResponse', {
       url: location.href,
     });
-    // location.reload();
+    location.reload();
+  });
+
+  addEventListener('stopRecording', e => {
+    localStorage.setItem('isRecording', false);
   });
 
   addEventListener('contextMenuAssertText', async e => {
-    console.log('received contextMenuAssertText');
-
     const fiberId = getElementToFiberId(window.clickedElement);
     const sourceComponent = await getComponentFromFiberId(fiberId);
 
@@ -229,8 +234,6 @@ const safeDispatchEvent = (eventName, payload) => {
   });
 
   addEventListener('contextMenuAssertExist', async e => {
-    console.log('received contextMenuAssertExist');
-
     const fiberId = getElementToFiberId(window.clickedElement);
     const sourceComponent = await getComponentFromFiberId(fiberId);
 

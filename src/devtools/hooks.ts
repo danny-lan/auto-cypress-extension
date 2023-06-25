@@ -177,6 +177,8 @@ export function provideActionsPanelContext(): TActionsPanelContext {
   };
 
   const cancel = () => {
+    console.log('cancelling');
+    sendEvent('stopRecording');
     setActions([]);
   };
 

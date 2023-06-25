@@ -4,7 +4,7 @@ import { useActionsPanelContext } from './context';
 
 const ActionsPanel = () => {
   const theme = useTheme();
-  const { actions, startRecording } = useActionsPanelContext();
+  const { actions, startRecording, cancel } = useActionsPanelContext();
 
   console.log('state', actions);
 
@@ -79,7 +79,7 @@ const ActionsPanel = () => {
             {actions.map(action => renderAction(action))}
           </Flex>
           <Flex justify="space-between">
-            <Button flex="1" borderRadius="0">
+            <Button flex="1" borderRadius="0" onClick={cancel}>
               Cancel
             </Button>
             <Button flex="1" borderRadius="0" colorScheme="green">

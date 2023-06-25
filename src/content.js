@@ -56,10 +56,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   //   );
   // }
 
-  // Forward to inject.js
   console.log('msg.action', msg.action);
+
+  // Forward to inject.js
   if (msg.action === 'startRecording') {
     dispatchEvent(new CustomEvent('startRecording'));
+  }
+  if (msg.action === 'stopRecording') {
+    dispatchEvent(new CustomEvent('stopRecording'));
   }
   if (msg.action === 'contextMenuAssertText') {
     dispatchEvent(new CustomEvent('contextMenuAssertText'));
@@ -78,7 +82,6 @@ addEventListener('startRecordingResponse', e => {
 });
 
 addEventListener('userClick', e => {
-  console.log('received event', e);
   chrome.runtime.sendMessage({
     message: 'userClick',
     stringifiedPayload: e.detail,
@@ -86,7 +89,6 @@ addEventListener('userClick', e => {
 });
 
 addEventListener('userAssert', e => {
-  console.log('received event', e);
   chrome.runtime.sendMessage({
     message: 'userAssert',
     stringifiedPayload: e.detail,
@@ -94,7 +96,6 @@ addEventListener('userAssert', e => {
 });
 
 addEventListener('userKeyPress', e => {
-  console.log('received event', e);
   chrome.runtime.sendMessage({
     message: 'userKeyPress',
     stringifiedPayload: e.detail,
