@@ -1,9 +1,9 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext } from 'react';
 import {
   TNetworkPanelContext,
   TNetworkPanelView,
-  TNetworkRequest
-} from "../types";
+  TNetworkRequest,
+} from '../types';
 
 // Create a context
 const NetworkPanelContext = createContext<TNetworkPanelContext>({
@@ -22,7 +22,9 @@ const NetworkPanelContext = createContext<TNetworkPanelContext>({
   cancelRequestSelection: () => null,
   confirmKeySelection: () => null,
   cancelKeySelection: () => null,
-  view: "list",
+  intercepts: [],
+  setIntercepts: () => null,
+  view: 'list',
 });
 
 export const NetworkPanelContextProvider = NetworkPanelContext.Provider;

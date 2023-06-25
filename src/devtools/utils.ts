@@ -2,6 +2,7 @@ import get from 'lodash/get';
 import writeTestPrompt from './prompts/cypressTest';
 import interceptPrompt from './prompts/intercept';
 import { TNetworkRequest } from './types';
+import crypto from 'crypto-js';
 
 export function getTerminalFieldPaths(obj: any, prefix = ''): string[] {
   let paths: string[] = [];
@@ -182,11 +183,34 @@ export async function requestFromOpenAI({
   return response;
 }
 
+export async function applyChanges(actions: any[]) {
+  const response = await fetch(`http://localhost:3010/apply-code-changes`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ actions }),
+  }).then(response => response.json());
+
+  return response;
+}
+
 export const sendEvent = (actionName: string, payload?: any) => {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    const activeTabId = tabs[0].id as number;
-
-    // Get data from react devtools agent and do stuff with it
-    chrome.tabs.sendMessage(activeTabId, { action: actionName, payload });
+    const activeTabId = tabs[0]?.id as number;
+    // console.log('sending event', actionName, 'tabId', activeTabId)
+    // if (activeTabId) {
+    //   // Get data from react devtools agent and do stuff with it
+    //   chrome.tabs.sendMessage(activeTabId, { action: actionName, payload });
+    // }
   });
+  chrome.runtime.sendMessage({ action: actionName, payload });
 };
+
+function getStableTestId(filepath: string, props: any) {
+  const sourceFileName = filepath.split('/').slice(-1)?.[0]?.split('.')?.[0];
+
+  const str = JSON.stringify(props, Object.keys(props).sort());
+  const hash = crypto.SHA256(str);
+  return `${sourceFileName}-${hash.toString()}`;
+}

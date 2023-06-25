@@ -3,17 +3,17 @@ const fs = require('fs');
 const path = require('path');
 const cors = require('cors');
 const { Configuration, OpenAIApi } = require('openai');
-const { generatePatch, applyPatch } = require('./codemods');
+const { generatePatch, applyPatch, generateCode } = require('./codemods');
 const { createInterface } = require('readline');
 
-const rl = createInterface({
-  input: process.stdin,
-  output: process.stdout,
-});
+// const rl = createInterface({
+//   input: process.stdin,
+//   output: process.stdout,
+// });
 
-rl.question('Enter OpenAI key:', apiKey => {
+// rl.question('Enter OpenAI key:', apiKey => {
   const configuration = new Configuration({
-    apiKey,
+    apiKey: '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',
   });
   const openai = new OpenAIApi(configuration);
 
@@ -22,8 +22,8 @@ rl.question('Enter OpenAI key:', apiKey => {
   app.use(cors());
   app.use(express.json());
 
-  // const BASE_PATH = '/Users/erichan/instabase/webserver/shared/src/js/webpacked';
-  const BASE_PATH = '/Users/hoangpaul/Documents/instabase';
+  const BASE_PATH = '/Users/erichan/instabase/webserver/shared/src/js/webpacked';
+  // const BASE_PATH = '/Users/hoangpaul/Documents/instabase';
 
   // Endpoint to get file content
   app.get('/file', (req, res) => {
@@ -112,6 +112,7 @@ rl.question('Enter OpenAI key:', apiKey => {
     }
   });
 
+
   // Endpoint to generate patch file
   app.get('/diff', (req, res) => {
     let { filepath, props } = req.query;
@@ -154,5 +155,37 @@ rl.question('Enter OpenAI key:', apiKey => {
     return res.json({ success: true });
   });
 
+  app.post('/apply-code-changes', (req, res) => {
+    let { actions } = req.body;
+
+    if (!actions) {
+      return res.status(400).send('actions');
+    }
+
+    actions.forEach((action) => {
+      const { type, sourceFile, details } = action;
+      if (type === 'click' || type === 'assert') {
+        // Resolve the path to the base directory
+        const filepath = path.join(BASE_PATH, sourceFile);
+
+        // Ensure the resolved path still points to a location inside the base directory
+        if (!filepath.startsWith(BASE_PATH)) {
+          return res.status(400).send('Invalid file path');
+        }
+        
+        const { newCode } = generateCode({ filepath, props: details.props });
+        fs.writeFile(filepath, newCode, 'utf8', err => {
+          if (err) {
+            console.error(err);
+            return res
+              .status(500)
+              .send('An error occurred while writing to the file.');
+          }
+        })
+      }
+    })
+   
+    return res.json({ success: true });
+  })
   app.listen(3010, () => console.log('Server is listening on port 3010'));
-});
+// });

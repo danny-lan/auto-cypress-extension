@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from 'react';
+
 export type TNetworkPanelView = 'list' | 'match' | 'result';
 
 export type TNetworkRequestParam = {
@@ -17,7 +19,7 @@ export type TNetworkRequest = {
   };
 };
 
-export type TPanelView = 'actions' | 'network';
+export type TPanelView = 'actions' | 'network' | 'test';
 
 export type TNetworkPanelContext = {
   requests: TNetworkRequest[];
@@ -37,6 +39,8 @@ export type TNetworkPanelContext = {
   setSelectedResponseBodyKeys: (
     responseBodyKeys: Record<string, boolean>
   ) => void;
+  intercepts: string[];
+  setIntercepts: Dispatch<SetStateAction<string[]>>;
   confirmRequestSelection: () => void;
   cancelRequestSelection: () => void;
   confirmKeySelection: () => void;
@@ -49,6 +53,7 @@ export type TAction =
       type: 'click';
       sourceFile?: string;
       details?: { nodes: any[]; props: Record<string, any> };
+      tagName: string;
     }
   | {
       type: 'keyboard';
@@ -62,6 +67,7 @@ export type TAction =
       type: 'assert';
       assertType: 'exists';
       sourceFile?: string;
+      tagName?: string;
       details?: { nodes: any[]; props: Record<string, any> };
     }
   | {
@@ -69,6 +75,7 @@ export type TAction =
       assertType: 'contains';
       assertContainsText: string;
       sourceFile?: string;
+      tagName?: string;
       details?: { nodes: any[]; props: Record<string, any> };
     };
 
@@ -76,5 +83,4 @@ export type TActionsPanelContext = {
   actions: TAction[];
   startRecording: () => void;
   cancel: () => void;
-  generateTestSuite: () => void;
 };

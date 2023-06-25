@@ -6,7 +6,6 @@ const ActionsPanelContext = createContext<TActionsPanelContext>({
   actions: [],
   startRecording: () => undefined,
   cancel: () => undefined,
-  generateTestSuite: () => undefined,
 });
 
 export const ActionsPanelContextProvider = ActionsPanelContext.Provider;

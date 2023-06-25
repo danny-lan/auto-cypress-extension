@@ -203,6 +203,7 @@ const safeDispatchEvent = (eventName, payload) => {
     safeDispatchEvent('userClick', {
       sourceFile,
       details,
+      tagName: e.target.tagName,
     });
   });
 
@@ -228,6 +229,7 @@ const safeDispatchEvent = (eventName, payload) => {
     safeDispatchEvent('userAssert', {
       sourceFile,
       details,
+      tagName: e.target.tagName,
       assertType: 'contains',
       assertContainsText: window.clickedElement.innerText,
     });

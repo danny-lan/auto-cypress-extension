@@ -1,10 +1,16 @@
-import React, { FC, useEffect, useState } from "react";
-import { useNetworkPanelContext } from "./context";
+import React, {
+  Dispatch,
+  FC,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
+import { useNetworkPanelContext } from './context';
 import {
   pruneObject,
   requestNetworkInterceptFromOpenAI,
   safeJsonParse,
-} from "../utils";
+} from '../utils';
 import {
   Box,
   Button,
@@ -13,10 +19,13 @@ import {
   FormErrorIcon,
   Spinner,
   useTheme,
-} from "@chakra-ui/react";
-import { ArrowBackIcon } from "@chakra-ui/icons";
+} from '@chakra-ui/react';
+import { ArrowBackIcon, ArrowForwardIcon } from '@chakra-ui/icons';
+import { TPanelView } from '../types';
 
-const NetworkRequestModelResult: FC = () => {
+const NetworkRequestModelResult: FC<{
+  setMainView: Dispatch<SetStateAction<TPanelView>>;
+}> = ({ setMainView }) => {
   const theme = useTheme();
   const {
     selectedRequestList,
@@ -24,17 +33,18 @@ const NetworkRequestModelResult: FC = () => {
     selectedRequestBodyKeys,
     selectedResponseBodyKeys,
     cancelKeySelection,
+    setIntercepts,
   } = useNetworkPanelContext();
   const [code, setCode] = useState<string | undefined>(undefined);
   const [error, setError] = useState<Error | undefined>(undefined);
 
   useEffect(() => {
-    const prunedRequests = selectedRequestList.map((req) => {
+    const prunedRequests = selectedRequestList.map(req => {
       const prunedQuery = req.requestQuery.filter(
-        (param) => selectedRequestQueryKeys[param.name]
+        param => selectedRequestQueryKeys[param.name]
       );
       const prunedBody = (req.requestBody || []).filter(
-        (param) => selectedRequestBodyKeys[param.name]
+        param => selectedRequestBodyKeys[param.name]
       );
       const parsedBody = safeJsonParse(req.response.body);
       const prunedResponse = parsedBody
@@ -49,10 +59,13 @@ const NetworkRequestModelResult: FC = () => {
     });
 
     requestNetworkInterceptFromOpenAI(prunedRequests)
-      .then((res) => {
+      .then(res => {
         setCode(res);
+        setIntercepts(prev => {
+          return [...prev, res];
+        });
       })
-      .catch((err) => {
+      .catch(err => {
         setError(err);
       });
   }, []);
@@ -103,13 +116,20 @@ const NetworkRequestModelResult: FC = () => {
       alignItems="stretch"
       overflow="auto"
     >
-      <Flex justifyContent="flex-start">
+      <Flex justifyContent="space-between">
         <Button
           leftIcon={<ArrowBackIcon />}
           onClick={cancelKeySelection}
           size="sm"
         >
           Go Back
+        </Button>
+        <Button
+          leftIcon={<ArrowForwardIcon />}
+          onClick={() => setMainView('test')}
+          size="sm"
+        >
+          Create Test
         </Button>
       </Flex>
       {renderContent()}

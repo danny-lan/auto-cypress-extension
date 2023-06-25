@@ -57,7 +57,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // }
 
   console.log('msg.action', msg.action);
-
+  console.log('sender', sender)
   // Forward to inject.js
   if (msg.action === 'startRecording') {
     dispatchEvent(new CustomEvent('startRecording'));

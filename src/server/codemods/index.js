@@ -6,6 +6,15 @@ const { execSync } = require('child_process');
 const { stringTransformer } = require('./strategies');
 const { checkAndAddTestIdImport } = require('./import');
 
+const crypto = require('crypto-js');
+
+function getStableTestId(filepath, props) {
+  const sourceFileName = filepath.split('/').slice(-1)?.[0]?.split('.')?.[0]
+
+  const str = JSON.stringify(props, Object.keys(props).sort());
+  const hash = crypto.SHA256(str)
+  return `${sourceFileName}-${hash.toString()}`
+}
 // thanks chatgpt
 const runDiffCommand = (contentA, contentB) => {
   // Create temporary files with the provided contents
@@ -35,16 +44,18 @@ const runPatchCommand = (filepath, patch) => {
   return response;
 };
 
+
 const printer = ts.createPrinter({
   newLine: ts.NewLineKind.LineFeed,
   removeComments: false,
 });
 
-const applyStrategies = ({ sourceFile, props = {} }) => {
+const applyStrategies = ({ sourceFile, props = {}, testId }) => {
   const hasAppliedStrategyRef = { current: false };
 
+  
   const result = ts.transform(sourceFile, [
-    stringTransformer({ hasAppliedStrategyRef, props, testId: 'foobarbaz' }),
+    stringTransformer({ hasAppliedStrategyRef, props, testId  }),
   ]);
 
   if (hasAppliedStrategyRef.current) {
@@ -54,7 +65,7 @@ const applyStrategies = ({ sourceFile, props = {} }) => {
   return { newSourceFile: sourceFile, hasAppliedStrategy: false };
 };
 
-const generatePatch = ({ filepath, props }) => {
+const generateCode = ({ filepath, props }) => {
   const src = fs.readFileSync(filepath, { encoding: 'utf-8' });
 
   const sourceFile = ts.createSourceFile(
@@ -64,12 +75,15 @@ const generatePatch = ({ filepath, props }) => {
     true,
     ts.ScriptKind.TSX
   );
-
+  const testId = getStableTestId(filepath, props);
   let { newSourceFile, hasAppliedStrategy } = applyStrategies({
+    testId,
     sourceFile,
     props,
   });
 
+  console.log(newSourceFile)
+  
   if (hasAppliedStrategy) {
     newSourceFile = checkAndAddTestIdImport(newSourceFile);
   }
@@ -80,9 +94,17 @@ const generatePatch = ({ filepath, props }) => {
     arrowParens: 'avoid',
     trailingComma: 'es5',
   });
-
-  return runDiffCommand(src, newCode);
+  return {
+    src,
+    newCode
+  }
+ 
 };
+
+const generatePatch = ({ filepath, props}) => {
+  const {src, newCode} = generateCode({filepath, props})
+  return runDiffCommand(src, newCode);
+}
 
 const applyPatch = ({ filepath, patch }) => {
   if (!patch) return;
@@ -90,6 +112,7 @@ const applyPatch = ({ filepath, patch }) => {
 };
 
 module.exports = {
+  generateCode,
   generatePatch,
   applyPatch,
 };

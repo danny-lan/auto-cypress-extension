@@ -13,7 +13,7 @@ const findTextInChildrenStrategy = ({ node, props }) => {
   if (!props.children) return false;
   if (isJsxTextWithString(node, props.children)) {
     const hasDataTestId = node.openingElement.attributes.properties.some(
-      property => property.name.escapedText === 'data-testid'
+      property => property?.name?.escapedText === 'data-testid'
     );
     if (true || !hasDataTestId) {
       return true;
@@ -27,7 +27,7 @@ const matchPropsInNodeStrategy = ({ node, props }) => {
   if (propsToFind.length === 0) return false;
   if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
     const nodeProps = node.attributes.properties.map(
-      prop => prop.name.escapedText
+      prop => prop?.name?.escapedText
     );
     const propLabelsToFind = Object.keys(propsToFind);
     return (

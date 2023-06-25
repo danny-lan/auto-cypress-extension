@@ -1,8 +1,11 @@
 import { Box, Button, Flex, Heading, Text, useTheme } from '@chakra-ui/react';
-import { TAction } from '../types';
+import { Dispatch, SetStateAction } from 'react';
+import { TAction, TPanelView } from '../types';
 import { useActionsPanelContext } from './context';
 
-const ActionsPanel = () => {
+const ActionsPanel: React.FC<{
+  setView: Dispatch<SetStateAction<TPanelView>>;
+}> = ({ setView }) => {
   const theme = useTheme();
   const { actions, startRecording, cancel } = useActionsPanelContext();
 
@@ -82,8 +85,13 @@ const ActionsPanel = () => {
             <Button flex="1" borderRadius="0" onClick={cancel}>
               Cancel
             </Button>
-            <Button flex="1" borderRadius="0" colorScheme="green">
-              Generate test suite
+            <Button
+              flex="1"
+              borderRadius="0"
+              colorScheme="green"
+              onClick={() => setView('network')}
+            >
+              Select network stubs
             </Button>
           </Flex>
         </>

@@ -1,8 +1,19 @@
-export default function writeTestPrompt({ title, url, intercepts, items }: {
-  title: string,
-  url: string,
-  intercepts: string,
-  items: { type: string, "data-testid": string, textContent: string, value: string, tagName: string }[]
+export default function writeTestPrompt({
+  title,
+  url,
+  intercepts,
+  items,
+}: {
+  title: string;
+  url: string;
+  intercepts: string;
+  items: {
+    type: string;
+    'data-testid': string;
+    textContent: string;
+    value: string;
+    tagName: string;
+  }[];
 }) {
   return `
   Write a Cypress test that meets the following conditions:
@@ -36,7 +47,7 @@ export default function writeTestPrompt({ title, url, intercepts, items }: {
   Add a comment to each line of code to explain what it does.
   Include these cypress lines in the body of the cypress test.
   
-  ${items}
+  ${JSON.stringify(items)}
 
   Don't include the question or any explanations in your response.  
 `;

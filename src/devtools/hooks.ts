@@ -7,7 +7,7 @@ import {
   TNetworkPanelView,
   TNetworkRequest,
 } from './types';
-import { getTerminalFieldsAndValues, sendEvent } from './utils';
+import { applyChanges, getTerminalFieldsAndValues, sendEvent } from './utils';
 
 export function provideNetworkPanelContext(): TNetworkPanelContext {
   const [requests, setRequests] = useState<TNetworkRequest[]>([]);
@@ -15,6 +15,7 @@ export function provideNetworkPanelContext(): TNetworkPanelContext {
     Record<string, TNetworkRequest>
   >({});
   const [view, setView] = useState<TNetworkPanelView>('list');
+  const [intercepts, setIntercepts] = useState<string[]>([]);
   const [selectedRequestQueryKeys, setSelectedRequestQueryKeys] = useState<
     Record<string, boolean>
   >({});
@@ -91,6 +92,8 @@ export function provideNetworkPanelContext(): TNetworkPanelContext {
     confirmKeySelection,
     cancelKeySelection: confirmRequestSelection,
     view,
+    intercepts,
+    setIntercepts,
   };
 }
 
@@ -125,8 +128,12 @@ export function provideActionsPanelContext(): TActionsPanelContext {
       console.log('payload', { message, stringifiedPayload });
       switch (message) {
         case 'userClick': {
-          const { details, sourceFile } = JSON.parse(stringifiedPayload);
-          setActions([...actions, { type: 'click', sourceFile, details }]);
+          const { details, sourceFile, tagName } =
+            JSON.parse(stringifiedPayload);
+          setActions([
+            ...actions,
+            { type: 'click', sourceFile, details, tagName },
+          ]);
           break;
         }
         case 'userKeyPress': {
@@ -142,8 +149,13 @@ export function provideActionsPanelContext(): TActionsPanelContext {
           break;
         }
         case 'userAssert': {
-          const { details, sourceFile, assertType, assertContainsText } =
-            JSON.parse(stringifiedPayload);
+          const {
+            details,
+            sourceFile,
+            assertType,
+            assertContainsText,
+            tagName,
+          } = JSON.parse(stringifiedPayload);
           setActions([
             ...actions,
             {
@@ -152,6 +164,7 @@ export function provideActionsPanelContext(): TActionsPanelContext {
               sourceFile,
               details,
               assertContainsText,
+              tagName,
             },
           ]);
           break;
@@ -182,14 +195,11 @@ export function provideActionsPanelContext(): TActionsPanelContext {
     setActions([]);
   };
 
-  const generateTestSuite = () => {};
-
   console.log(actions);
 
   return {
     actions,
     startRecording,
     cancel,
-    generateTestSuite,
   };
 }
