@@ -40,19 +40,12 @@ const printer = ts.createPrinter({
   removeComments: false,
 });
 
-const strategies = [stringTransformer];
-
 const applyStrategies = ({ sourceFile, props = {} }) => {
   const hasAppliedStrategyRef = { current: false };
 
-  let result;
-  for (let i = 0; i < strategies.length; i++) {
-    const strategy = strategies[i];
-    result = ts.transform(sourceFile, [
-      strategy({ hasAppliedStrategyRef, props, testId: 'foobarbaz' }),
-    ]);
-    if (hasAppliedStrategyRef.current) break;
-  }
+  const result = ts.transform(sourceFile, [
+    stringTransformer({ hasAppliedStrategyRef, props, testId: 'foobarbaz' }),
+  ]);
 
   if (hasAppliedStrategyRef.current) {
     return { newSourceFile: result.transformed[0], hasAppliedStrategy: true };
