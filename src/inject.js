@@ -168,6 +168,26 @@ const safeDispatchEvent = (eventName, payload) => {
 
   addEventListener('keydown', e => {
     console.log('keydown', e);
+
+    let text;
+    switch (e.key) {
+      case 'Shift':
+        return;
+      case 'Enter':
+        text = '{enter}';
+        break;
+      case 'Escape':
+        text = '{esc}';
+        break;
+      default:
+        // Ignore other special keys, like the shift key for now
+        if (e.key.length > 1) return;
+        text = e.key;
+    }
+
+    safeDispatchEvent('userKeyPress', {
+      text,
+    });
   });
 
   addEventListener('click', async e => {

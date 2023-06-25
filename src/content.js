@@ -93,6 +93,14 @@ addEventListener('userAssert', e => {
   });
 });
 
+addEventListener('userKeyPress', e => {
+  console.log('received event', e);
+  chrome.runtime.sendMessage({
+    message: 'userKeyPress',
+    stringifiedPayload: e.detail,
+  });
+});
+
 // Set up getWindow call for using react devtools global hook
 // chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 //   if (msg.action === 'getWindow') {

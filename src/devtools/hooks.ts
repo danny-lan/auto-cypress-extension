@@ -129,6 +129,18 @@ export function provideActionsPanelContext(): TActionsPanelContext {
           setActions([...actions, { type: 'click', sourceFile, details }]);
           break;
         }
+        case 'userKeyPress': {
+          const { text } = JSON.parse(stringifiedPayload);
+          const lastAction = actions[actions.length - 1];
+          if (lastAction.type === 'keyboard') {
+            // Mutate the last action object to append the new string
+            lastAction.text = `${lastAction.text}${text}`;
+            setActions([...actions]);
+          } else {
+            setActions([...actions, { type: 'keyboard', text }]);
+          }
+          break;
+        }
         case 'userAssert': {
           const { details, sourceFile, assertType, assertContainsText } =
             JSON.parse(stringifiedPayload);

@@ -46,9 +46,13 @@ export type TNetworkPanelContext = {
 
 export type TAction =
   | {
-      type: 'click' | 'keyboard';
+      type: 'click';
       sourceFile?: string;
       details?: { nodes: any[]; props: Record<string, any> };
+    }
+  | {
+      type: 'keyboard';
+      text: string;
     }
   | {
       type: 'visit';

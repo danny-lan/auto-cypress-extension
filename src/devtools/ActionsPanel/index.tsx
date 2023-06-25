@@ -19,6 +19,16 @@ const ActionsPanel = () => {
         </Box>
       );
     }
+    if (action.type === 'keyboard') {
+      return (
+        <Box borderLeft={`8px solid ${theme.colors.green[300]}`} p={2} mb={2}>
+          <Text fontWeight="bold" mb={1}>
+            {action.type}
+          </Text>
+          <Text>{action.text}</Text>
+        </Box>
+      );
+    }
     if (action.type === 'visit') {
       return (
         <Box borderLeft={`8px solid ${theme.colors.green[300]}`} p={2} mb={2}>
