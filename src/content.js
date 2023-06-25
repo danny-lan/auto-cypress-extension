@@ -36,49 +36,76 @@ function elementToJSON(element) {
 }
 
 // Save the clicked element to pass to extension
-window.addEventListener('contextmenu', function (event) {
-  window.clickedElement = event.target;
-});
+// window.addEventListener('contextmenu', function (event) {
+//   window.clickedElement = event.target;
+// });
 
 // Set up getSelectedElement call to get selected element when
 // context menu item clicked
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.action === 'getSelectedElement') {
-    // Get the selected element
-    console.log('selectedElement', window.clickedElement);
-    const selectedElement = elementToJSON(window.clickedElement);
+  // if (msg.action === 'getSelectedElement') {
+  //   // Get the selected element
+  //   console.log('selectedElement', window.clickedElement);
+  //   const selectedElement = elementToJSON(window.clickedElement);
 
-    sendResponse({ selectedElement: selectedElement });
-    dispatchEvent(
-      new CustomEvent('viewSelectedElement', {
-        detail: selectedElement,
-      })
-    );
+  //   // sendResponse({ selectedElement: selectedElement });
+  //   dispatchEvent(
+  //     new CustomEvent('viewSelectedElement', {
+  //       detail: selectedElement,
+  //     })
+  //   );
+  // }
+
+  // Forward to inject.js
+  console.log('msg.action', msg.action);
+  if (msg.action === 'startRecording') {
+    dispatchEvent(new CustomEvent('startRecording'));
+  }
+  if (msg.action === 'contextMenuAssertText') {
+    dispatchEvent(new CustomEvent('contextMenuAssertText'));
+  }
+  if (msg.action === 'contextMenuAssertExist') {
+    dispatchEvent(new CustomEvent('contextMenuAssertExist'));
   }
 });
 
-addEventListener('myevent', e => {
+addEventListener('startRecordingResponse', e => {
+  console.log('running startRecordingResponse', e);
+  chrome.runtime.sendMessage({
+    message: 'startRecordingResponse',
+    stringifiedPayload: e.detail,
+  });
+});
+
+addEventListener('userClick', e => {
   console.log('received event', e);
-  const payload = {
-    type: 'click',
-    detail: e.detail,
-  };
-  chrome.runtime.sendMessage(`${JSON.stringify(payload)}`);
+  chrome.runtime.sendMessage({
+    message: 'userClick',
+    stringifiedPayload: e.detail,
+  });
+});
+
+addEventListener('userAssert', e => {
+  console.log('received event', e);
+  chrome.runtime.sendMessage({
+    message: 'userAssert',
+    stringifiedPayload: e.detail,
+  });
 });
 
 // Set up getWindow call for using react devtools global hook
-chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
-  if (msg.action === 'getWindow') {
-    addEventListener(
-      'fromPage',
-      e => {
-        sendResponse(JSON.parse(e.detail));
-      },
-      { once: true }
-    );
-    dispatchEvent(new Event('toPage'));
-  }
-});
+// chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+//   if (msg.action === 'getWindow') {
+//     addEventListener(
+//       'fromPage',
+//       e => {
+//         sendResponse(JSON.parse(e.detail));
+//       },
+//       { once: true }
+//     );
+//     dispatchEvent(new Event('toPage'));
+//   }
+// });
 
 var s = document.createElement('script');
 s.src = chrome.runtime.getURL('js/inject.js');

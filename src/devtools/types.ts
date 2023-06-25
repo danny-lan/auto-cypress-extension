@@ -1,4 +1,4 @@
-export type TNetworkPanelView = "list" | "match" | "result";
+export type TNetworkPanelView = 'list' | 'match' | 'result';
 
 export type TNetworkRequestParam = {
   name: string;
@@ -17,7 +17,7 @@ export type TNetworkRequest = {
   };
 };
 
-export type TPanelView = "actions" | "network";
+export type TPanelView = 'actions' | 'network';
 
 export type TNetworkPanelContext = {
   requests: TNetworkRequest[];
@@ -44,12 +44,33 @@ export type TNetworkPanelContext = {
   view: TNetworkPanelView;
 };
 
-export type TAction = {
-  type: "click" | "keyboard" | "assert";
-  sourceFile: string;
-  details: { nodes: any[]; props: Record<string, any> };
-};
+export type TAction =
+  | {
+      type: 'click' | 'keyboard';
+      sourceFile?: string;
+      details?: { nodes: any[]; props: Record<string, any> };
+    }
+  | {
+      type: 'visit';
+      url: string;
+    }
+  | {
+      type: 'assert';
+      assertType: 'exists';
+      sourceFile?: string;
+      details?: { nodes: any[]; props: Record<string, any> };
+    }
+  | {
+      type: 'assert';
+      assertType: 'contains';
+      assertContainsText: string;
+      sourceFile?: string;
+      details?: { nodes: any[]; props: Record<string, any> };
+    };
 
 export type TActionsPanelContext = {
   actions: TAction[];
+  startRecording: () => void;
+  cancel: () => void;
+  generateTestSuite: () => void;
 };

@@ -1,20 +1,20 @@
+import { nanoid } from 'nanoid';
+import { useEffect, useMemo, useState } from 'react';
 import {
   TAction,
   TActionsPanelContext,
   TNetworkPanelContext,
   TNetworkPanelView,
   TNetworkRequest,
-} from "./types";
-import { useEffect, useMemo, useState } from "react";
-import { getTerminalFieldsAndValues } from "./utils";
-import { nanoid } from "nanoid";
+} from './types';
+import { getTerminalFieldsAndValues, sendEvent } from './utils';
 
 export function provideNetworkPanelContext(): TNetworkPanelContext {
   const [requests, setRequests] = useState<TNetworkRequest[]>([]);
   const [selectedRequests, setSelectedRequests] = useState<
     Record<string, TNetworkRequest>
   >({});
-  const [view, setView] = useState<TNetworkPanelView>("list");
+  const [view, setView] = useState<TNetworkPanelView>('list');
   const [selectedRequestQueryKeys, setSelectedRequestQueryKeys] = useState<
     Record<string, boolean>
   >({});
@@ -25,14 +25,14 @@ export function provideNetworkPanelContext(): TNetworkPanelContext {
     Record<string, boolean>
   >({});
   const selectedRequestList = useMemo(() => {
-    return requests.filter((req) => !!selectedRequests[req.id]);
+    return requests.filter(req => !!selectedRequests[req.id]);
   }, [requests, selectedRequests]);
 
   useEffect(() => {
-    const callback: (request: chrome.devtools.network.Request) => void = (
-      request
-    ) => {
-      request.getContent(async (responseContent) => {
+    const callback: (
+      request: chrome.devtools.network.Request
+    ) => void = request => {
+      request.getContent(async responseContent => {
         const { url, queryString: requestQuery } = request.request;
         const requestBodyText = request.request.postData?.text;
         const requestBody = requestBodyText
@@ -60,18 +60,18 @@ export function provideNetworkPanelContext(): TNetworkPanelContext {
   }, [requests]);
 
   function confirmRequestSelection() {
-    setView("match");
+    setView('match');
   }
 
   function cancelRequestSelection() {
-    setView("list");
+    setView('list');
     setSelectedRequestQueryKeys({});
     setSelectedRequestBodyKeys({});
     setSelectedResponseBodyKeys({});
   }
 
   function confirmKeySelection() {
-    setView("result");
+    setView('result');
   }
 
   return {
@@ -99,12 +99,12 @@ export function useFilteredNetworkRequests(
   selectedRequests: Record<string, TNetworkRequest>,
   search: string
 ) {
-  const filteredBySearch = requests.filter((req) => req.url.includes(search));
+  const filteredBySearch = requests.filter(req => req.url.includes(search));
   if (Object.values(selectedRequests).length) {
     const selected = Object.values(selectedRequests)[0];
-    return filteredBySearch.filter((req) => {
-      const path1 = req.url.split("?")[0];
-      const path2 = selected.url.split("?")[0];
+    return filteredBySearch.filter(req => {
+      const path1 = req.url.split('?')[0];
+      const path2 = selected.url.split('?')[0];
       return path1 === path2;
     });
   }
@@ -115,19 +115,67 @@ export function provideActionsPanelContext(): TActionsPanelContext {
   const [actions, setActions] = useState<TAction[]>([]);
 
   useEffect(() => {
-    console.log("chrome.runtime", chrome.runtime, chrome.runtime.onMessage);
-    const callback = (msg: string) => {
-      const parsedMsg = JSON.parse(msg);
-      const { details, sourceFile } = JSON.parse(parsedMsg.detail);
-      setActions([...actions, { type: parsedMsg.type, sourceFile, details }]);
+    const callback = ({
+      message,
+      stringifiedPayload,
+    }: {
+      message: string;
+      stringifiedPayload: string;
+    }) => {
+      console.log('payload', { message, stringifiedPayload });
+      switch (message) {
+        case 'userClick': {
+          const { details, sourceFile } = JSON.parse(stringifiedPayload);
+          setActions([...actions, { type: 'click', sourceFile, details }]);
+          break;
+        }
+        case 'userAssert': {
+          const { details, sourceFile, assertType, assertContainsText } =
+            JSON.parse(stringifiedPayload);
+          setActions([
+            ...actions,
+            {
+              type: 'assert',
+              assertType,
+              sourceFile,
+              details,
+              assertContainsText,
+            },
+          ]);
+          break;
+        }
+        case 'startRecordingResponse': {
+          const { url } = JSON.parse(stringifiedPayload);
+          setActions([...actions, { type: 'visit', url }]);
+          break;
+        }
+        default:
+          console.log('unknown message');
+          break;
+      }
     };
     chrome.runtime.onMessage.addListener(callback);
     return () => chrome.runtime.onMessage.removeListener(callback);
   }, [actions]);
 
+  const startRecording = () => {
+    // Send an event to content.js (which forwards to inject.js) to refresh the page.
+    // We expect a `startRecordingResponse` event to be returned, which is handled above.
+    sendEvent('startRecording');
+  };
+
+  const cancel = () => {
+    setActions([]);
+  };
+
+  const generateTestSuite = () => {};
+
   console.log(actions);
 
   return {
     actions,
+    startRecording,
+    cancel,
+    generateTestSuite,
   };
 }

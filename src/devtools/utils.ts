@@ -1,14 +1,14 @@
-import get from "lodash/get";
-import { TNetworkRequest } from "./types";
-import interceptPrompt from "./prompts/intercept";
-import writeTestPrompt from "./prompts/cypressTest";
+import get from 'lodash/get';
+import writeTestPrompt from './prompts/cypressTest';
+import interceptPrompt from './prompts/intercept';
+import { TNetworkRequest } from './types';
 
-export function getTerminalFieldPaths(obj: any, prefix = ""): string[] {
+export function getTerminalFieldPaths(obj: any, prefix = ''): string[] {
   let paths: string[] = [];
 
   for (let key in obj) {
     let newPath = prefix ? `${prefix}.${key}` : key;
-    if (typeof obj[key] === "object") {
+    if (typeof obj[key] === 'object') {
       paths = paths.concat(getTerminalFieldPaths(obj[key], newPath));
     } else {
       paths.push(newPath);
@@ -21,7 +21,7 @@ export function getTerminalFieldPaths(obj: any, prefix = ""): string[] {
 export function getTerminalFieldsAndValues(obj: any) {
   const terminalFields = getTerminalFieldPaths(obj);
 
-  return terminalFields.map((field) => ({
+  return terminalFields.map(field => ({
     name: field,
     value: get(obj, field),
   }));
@@ -38,7 +38,7 @@ export async function getFileContent(filePath: string) {
     const data = await response.text();
     return data;
   } catch (error) {
-    console.error("An error occurred while fetching the file content", error);
+    console.error('An error occurred while fetching the file content', error);
     throw error;
   }
 }
@@ -46,9 +46,9 @@ export async function getFileContent(filePath: string) {
 export async function writeFileContent(filePath: string, content: string) {
   try {
     const response = await fetch(`http://localhost:3000/file`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({ filePath, content }),
     });
@@ -60,7 +60,7 @@ export async function writeFileContent(filePath: string, content: string) {
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error("An error occurred while writing the file content", error);
+    console.error('An error occurred while writing the file content', error);
     throw error;
   }
 }
@@ -84,7 +84,7 @@ export function pruneObject(
 ): JsonObject {
   const pruned: JsonObject = {};
 
-  keyPaths.forEach((keyPath) => {
+  keyPaths.forEach(keyPath => {
     const value = get(jsonObject, keyPath);
     if (value !== undefined) {
       setValueByPath(pruned, keyPath, value);
@@ -95,7 +95,7 @@ export function pruneObject(
 }
 
 function setValueByPath(obj: JsonObject, path: string, value: any) {
-  const keys = path.split(".");
+  const keys = path.split('.');
   const lastKey = keys.pop();
   let currentObj: JsonObject = obj;
 
@@ -117,10 +117,10 @@ export async function requestNetworkInterceptFromOpenAI(
   const prompt = interceptPrompt(requests);
   console.log(prompt);
   const chatCompletion = await requestFromOpenAI({
-    openAIMethod: "createChatCompletion",
+    openAIMethod: 'createChatCompletion',
     requestBody: {
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }],
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: prompt }],
     },
   });
 
@@ -143,15 +143,21 @@ export async function generateCypressTestFromOpenAI(params: {
   title: string;
   url: string;
   intercepts: string;
-  items: { type: string, "data-testid": string, textContent: string, value: string, tagName: string }[];
+  items: {
+    type: string;
+    'data-testid': string;
+    textContent: string;
+    value: string;
+    tagName: string;
+  }[];
 }) {
   const prompt = writeTestPrompt(params);
   console.log(prompt);
   const chatCompletion = await requestFromOpenAI({
-    openAIMethod: "createChatCompletion",
+    openAIMethod: 'createChatCompletion',
     requestBody: {
-      model: "gpt-3.5-turbo",
-      messages: [{ role: "user", content: prompt }],
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: prompt }],
     },
   });
 
@@ -166,12 +172,21 @@ export async function requestFromOpenAI({
   requestBody: any;
 }) {
   const response = await fetch(`http://localhost:3010/open-ai`, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: JSON.stringify({ openAIMethod, requestBody }),
   }).then(response => response.json());
 
   return response;
 }
+
+export const sendEvent = (actionName: string, payload?: any) => {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+    const activeTabId = tabs[0].id as number;
+
+    // Get data from react devtools agent and do stuff with it
+    chrome.tabs.sendMessage(activeTabId, { action: actionName, payload });
+  });
+};
