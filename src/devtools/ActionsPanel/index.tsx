@@ -69,9 +69,9 @@ const ActionsPanel: React.FC<{
     <Flex id="actions-panel" direction="column" w="100vw" flex="1 0">
       {actions.length === 0 ? (
         <>
-          <Button my={8} mx="auto" onClick={startRecording}>
+          {/* <Button my={8} mx="auto" onClick={startRecording}>
             Start recording
-          </Button>
+          </Button> */}
         </>
       ) : (
         <>

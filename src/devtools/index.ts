@@ -1,3 +1,3 @@
-chrome.devtools.panels.create("Auto Cypress", "", 'js/panel.html');
+chrome.devtools.panels.create("Tree Tapper", "", 'js/panel.html');
 
 export {};

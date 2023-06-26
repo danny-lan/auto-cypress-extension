@@ -1,13 +1,13 @@
 {
     "version": "1.0.0",
     "manifest_version": 3,
-    "name": "Auto Cypress Extension",
+    "name": "Tree Tapper",
     "action": {
         "default_popup": "js/index.html",
-        "default_title": "Auto Cypress Extension",
+        "default_title": "Tree Tapper",
         "default_icon": {
-            "48": "res/knight-small.png",
-            "128": "res/knight-large.png"
+            "48": "res/tree-small.png",
+            "128": "res/tree-large.png"
         }
     },
     "devtools_page": "js/devtools.html",
@@ -24,7 +24,7 @@
     }],
     "permissions": ["activeTab", "scripting", "contextMenus"],
     "icons": {
-        "48": "res/knight-small.png",
-        "128": "res/knight-large.png"
+        "48": "res/tree-small.png",
+        "128": "res/tree-large.png"
     }
 }
