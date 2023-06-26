@@ -1,4 +1,4 @@
-import { HamburgerIcon, LinkIcon } from '@chakra-ui/icons';
+import { ArrowRightIcon, HamburgerIcon, LinkIcon } from '@chakra-ui/icons';
 import { Button, Flex, Heading } from '@chakra-ui/react';
 import { FC, useState } from 'react';
 import ActionsPanel from './ActionsPanel';
@@ -34,13 +34,25 @@ const Wrapper: FC = () => {
                 Stub Network Calls
               </Button>
             ) : (
-              <Button
-                onClick={() => setView('actions')}
-                size="sm"
-                leftIcon={<HamburgerIcon />}
-              >
-                See Recorded Actions
-              </Button>
+              <Flex>
+                <Button
+                  onClick={() => setView('actions')}
+                  size="sm"
+                  leftIcon={<HamburgerIcon />}
+                >
+                  See Recorded Actions
+                </Button>
+                {view === 'network' && (
+                  <Button
+                    onClick={() => setView('test')}
+                    size="sm"
+                    ml={1}
+                    rightIcon={<ArrowRightIcon />}
+                  >
+                    Skip
+                  </Button>
+                )}
+              </Flex>
             )}
           </Flex>
           {view === 'actions' ? (

@@ -7,7 +7,12 @@ import {
   TNetworkPanelView,
   TNetworkRequest,
 } from './types';
-import { getTerminalFieldsAndValues, sendEvent } from './utils';
+import {
+  getStableTestId,
+  getTerminalFieldsAndValues,
+  isClickAction,
+  sendEvent,
+} from './utils';
 
 export function provideNetworkPanelContext(): TNetworkPanelContext {
   const [requests, setRequests] = useState<TNetworkRequest[]>([]);
@@ -130,27 +135,47 @@ export function provideActionsPanelContext(): TActionsPanelContext {
         case 'userClick': {
           const { details, sourceFile, tagName } =
             JSON.parse(stringifiedPayload);
+          const testId =
+            details.props['data-testid'] ||
+            getStableTestId(sourceFile, details.props);
           setActions([
             ...actions,
-            { type: 'click', sourceFile, details, tagName },
+            { type: 'click', sourceFile, details, tagName, testId },
           ]);
           break;
         }
         case 'userKeyPress': {
           const { text } = JSON.parse(stringifiedPayload);
           const lastAction = actions[actions.length - 1];
+
+          console.log('lastAction', lastAction);
+
           if (lastAction.type === 'keyboard') {
             // Mutate the last action object to append the new string
             lastAction.text = `${lastAction.text}${text}`;
             setActions([...actions]);
-          } else {
-            setActions([...actions, { type: 'keyboard', text }]);
+          } else if (
+            isClickAction(lastAction) &&
+            lastAction.tagName === 'INPUT'
+          ) {
+            setActions([
+              ...actions,
+              {
+                type: 'keyboard',
+                text,
+                tagName: lastAction.tagName,
+                testId: lastAction.testId,
+              },
+            ]);
           }
           break;
         }
         case 'userAssertText': {
           const { details, sourceFile, assertContainsText, tagName } =
             JSON.parse(stringifiedPayload);
+          const testId =
+            details.props['data-testid'] ||
+            getStableTestId(sourceFile, details.props);
           setActions([
             ...actions,
             {
@@ -159,6 +184,7 @@ export function provideActionsPanelContext(): TActionsPanelContext {
               details,
               assertContainsText,
               tagName,
+              testId,
             },
           ]);
           break;
@@ -166,6 +192,9 @@ export function provideActionsPanelContext(): TActionsPanelContext {
         case 'userAssertExists': {
           const { details, sourceFile, tagName } =
             JSON.parse(stringifiedPayload);
+          const testId =
+            details.props['data-testid'] ||
+            getStableTestId(sourceFile, details.props);
           setActions([
             ...actions,
             {
@@ -173,6 +202,7 @@ export function provideActionsPanelContext(): TActionsPanelContext {
               sourceFile,
               details,
               tagName,
+              testId,
             },
           ]);
           break;

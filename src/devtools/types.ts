@@ -54,13 +54,15 @@ export type TClickAction = {
   sourceFile: string;
   details: { nodes: any[]; props: Record<string, any> };
   tagName: string;
+  testId: string;
 };
 
 export type TKeyboardAction = {
   type: 'keyboard';
   details?: { nodes: any[]; props: Record<string, any> };
-  tagName?: string;
+  tagName: string;
   text: string;
+  testId: string;
 };
 
 export type TVisitAction = {
@@ -73,6 +75,7 @@ export type TAssertExistsAction = {
   sourceFile: string;
   tagName: string;
   details: { nodes: any[]; props: Record<string, any> };
+  testId: string;
 };
 
 export type TAssertTextAction = {
@@ -81,6 +84,7 @@ export type TAssertTextAction = {
   sourceFile: string;
   tagName: string;
   details: { nodes: any[]; props: Record<string, any> };
+  testId: string;
 };
 
 export type TAction =

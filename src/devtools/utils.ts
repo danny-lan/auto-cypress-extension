@@ -245,8 +245,7 @@ export function isAssertTextAction(
 
 export const actionToPromptItem = (action: TAction): TItem => {
   if (isClickAction(action)) {
-    const { type, sourceFile, details, tagName } = action;
-    const testId = getStableTestId(sourceFile, details.props);
+    const { type, sourceFile, details, tagName, testId } = action;
 
     return {
       type,
@@ -254,21 +253,16 @@ export const actionToPromptItem = (action: TAction): TItem => {
       tagName,
     };
   } else if (isKeyboardAction(action)) {
-    // keyboard is not supported yet since we need to store the sourceFile of a keyboard event =(
-    // so we need to figure out what to do here...
-    throw new Error('keyboard action not supported');
-    // const { type, details, tagName, text } = action;
-    // const testId = getStableTestId(sourceFile, details.props);
+    const { type, tagName, text, testId } = action;
 
-    // return {
-    //   type,
-    //   tagName,
-    //   text,
-    //   testId,
-    // };
+    return {
+      type,
+      tagName,
+      text,
+      testId,
+    };
   } else if (isAssertExistsAction(action)) {
-    const { type, sourceFile, tagName, details } = action;
-    const testId = getStableTestId(sourceFile, details.props);
+    const { type, sourceFile, tagName, details, testId } = action;
 
     return {
       type,
@@ -276,8 +270,8 @@ export const actionToPromptItem = (action: TAction): TItem => {
       tagName,
     };
   } else if (isAssertTextAction(action)) {
-    const { type, assertContainsText, sourceFile, tagName, details } = action;
-    const testId = getStableTestId(sourceFile, details.props);
+    const { type, assertContainsText, sourceFile, tagName, details, testId } =
+      action;
 
     return {
       type,

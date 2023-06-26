@@ -105,8 +105,11 @@ app.post('/open-ai', async (req, res) => {
     // Call OpenAI API
     const resp = await openai[openAIMethod](requestBody);
 
+    console.log('resp', resp);
+
     res.json(resp.data);
   } catch (error) {
+    console.log(error);
     console.log(res.error);
     res.status(500).json({ error: error.toString() });
   }
