@@ -20,7 +20,7 @@ const { BASE_PATH } = require('./constants');
 // rl.question('Enter OpenAI key:', apiKey => {
 const configuration = new Configuration({
   // apiKey: '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',
-  apiKey: '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',
+  apiKey: 'i broke this api key by committing it to a public repo :sad:',
 });
 const openai = new OpenAIApi(configuration);
 
