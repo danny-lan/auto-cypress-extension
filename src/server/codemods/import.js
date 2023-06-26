@@ -1,5 +1,33 @@
 const ts = require('typescript');
 
+const checkAndAddConstantTransformer = testId => context => rootNode => {
+  let constantExists = false;
+  function checkConstantExists(node) {
+    if (ts.isPropertyAssignment(node) && node.name.escapedText === testId) {
+      constantExists = true;
+    }
+    return ts.visitEachChild(node, checkConstantExists, context);
+  }
+  ts.visitNode(rootNode, checkConstantExists);
+
+  if (constantExists) {
+    return rootNode;
+  }
+
+  function addConstant(node) {
+    if (
+      ts.isVariableDeclaration(node) &&
+      node.name.escapedText === 'TEST_IDS'
+    ) {
+      node.initializer.properties.push(
+        ts.createPropertyAssignment(testId, ts.createStringLiteral(testId))
+      );
+    }
+    return ts.visitEachChild(node, addConstant, context);
+  }
+  return ts.visitNode(rootNode, addConstant);
+};
+
 const checkAndAddImportTransformer = context => rootNode => {
   // Check if we've already imported `TEST_IDS`
   let hasTestIds = false;
@@ -77,6 +105,14 @@ const checkAndAddTestIdImport = sourceFile => {
   return result.transformed[0];
 };
 
+const checkAndAddConstantVariable = (sourceFile, testId) => {
+  const result = ts.transform(sourceFile, [
+    checkAndAddConstantTransformer(testId),
+  ]);
+  return result.transformed[0];
+};
+
 module.exports = {
   checkAndAddTestIdImport,
+  checkAndAddConstantVariable,
 };

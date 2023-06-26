@@ -7,7 +7,7 @@ import {
   TNetworkPanelView,
   TNetworkRequest,
 } from './types';
-import { applyChanges, getTerminalFieldsAndValues, sendEvent } from './utils';
+import { getTerminalFieldsAndValues, sendEvent } from './utils';
 
 export function provideNetworkPanelContext(): TNetworkPanelContext {
   const [requests, setRequests] = useState<TNetworkRequest[]>([]);
@@ -148,22 +148,30 @@ export function provideActionsPanelContext(): TActionsPanelContext {
           }
           break;
         }
-        case 'userAssert': {
-          const {
-            details,
-            sourceFile,
-            assertType,
-            assertContainsText,
-            tagName,
-          } = JSON.parse(stringifiedPayload);
+        case 'userAssertText': {
+          const { details, sourceFile, assertContainsText, tagName } =
+            JSON.parse(stringifiedPayload);
           setActions([
             ...actions,
             {
-              type: 'assert',
-              assertType,
+              type: 'assertText',
               sourceFile,
               details,
               assertContainsText,
+              tagName,
+            },
+          ]);
+          break;
+        }
+        case 'userAssertExists': {
+          const { details, sourceFile, tagName } =
+            JSON.parse(stringifiedPayload);
+          setActions([
+            ...actions,
+            {
+              type: 'assertExists',
+              sourceFile,
+              details,
               tagName,
             },
           ]);
@@ -186,7 +194,9 @@ export function provideActionsPanelContext(): TActionsPanelContext {
   const startRecording = () => {
     // Send an event to content.js (which forwards to inject.js) to refresh the page.
     // We expect a `startRecordingResponse` event to be returned, which is handled above.
+    console.log('sending event');
     sendEvent('startRecording');
+    console.log('sent');
   };
 
   const cancel = () => {

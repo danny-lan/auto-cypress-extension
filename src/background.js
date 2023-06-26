@@ -6,14 +6,11 @@ document.body.addEventListener('click', async () => {
 
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     const activeTabId = tabs[0].id;
-    console.log('ActiveTabId', activeTabId)
+    console.log('ActiveTabId', activeTabId);
     // chrome.runtime.sendMessage('any message');
 
     // Start recording when clicking on box
-    chrome.tabs.sendMessage(
-      activeTabId,
-      { action: 'startRecording' },
-    );
+    chrome.tabs.sendMessage(activeTabId, { action: 'startRecording' });
   });
 });
 

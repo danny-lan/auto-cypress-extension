@@ -1,10 +1,10 @@
-import { TNetworkRequest } from "../types";
+import { TNetworkRequest } from '../types';
 
 export default function getPrompt(requests: TNetworkRequest[]) {
   if (!requests.length) return undefined;
   const url = requests[0].url;
   return `
-Write a Cypress intercept that stubs the URL:
+Write a Cypress intercept using cy.intercept() that stubs the URL:
 ${url}
 
 Use a JSON list of objects with the fields:

@@ -57,7 +57,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   // }
 
   console.log('msg.action', msg.action);
-  console.log('sender', sender)
+  console.log('sender', sender);
   // Forward to inject.js
   if (msg.action === 'startRecording') {
     dispatchEvent(new CustomEvent('startRecording'));
@@ -88,9 +88,16 @@ addEventListener('userClick', e => {
   });
 });
 
-addEventListener('userAssert', e => {
+addEventListener('userAssertText', e => {
   chrome.runtime.sendMessage({
-    message: 'userAssert',
+    message: 'userAssertText',
+    stringifiedPayload: e.detail,
+  });
+});
+
+addEventListener('userAssertExist', e => {
+  chrome.runtime.sendMessage({
+    message: 'userAssertExist',
     stringifiedPayload: e.detail,
   });
 });

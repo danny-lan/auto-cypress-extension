@@ -200,14 +200,21 @@ const safeDispatchEvent = (eventName, payload) => {
     console.log('sourceFile', sourceFile);
     console.log('details', details.props, details);
 
+    const normalizeProps = Array.isArray(details.props)
+      ? details.props[0]?.props || details.props[0]
+      : details.props;
+
     safeDispatchEvent('userClick', {
       sourceFile,
-      details,
+      details: {
+        props: normalizeProps,
+      },
       tagName: e.target.tagName,
     });
   });
 
   addEventListener('startRecording', e => {
+    console.log('received startRecording');
     localStorage.setItem('isRecording', true);
     safeDispatchEvent('startRecordingResponse', {
       url: location.href,
@@ -226,7 +233,7 @@ const safeDispatchEvent = (eventName, payload) => {
     const sourceFile = getPathToSourceFile(sourceComponent, scriptContents);
     const details = getDetailsFromFiberId(fiberId);
 
-    safeDispatchEvent('userAssert', {
+    safeDispatchEvent('userAssertText', {
       sourceFile,
       details,
       tagName: e.target.tagName,
@@ -249,7 +256,7 @@ const safeDispatchEvent = (eventName, payload) => {
       windowElement: window.clickedElement,
     });
 
-    safeDispatchEvent('userAssert', {
+    safeDispatchEvent('userAssertExist', {
       sourceFile,
       details,
       assertType: 'exists',

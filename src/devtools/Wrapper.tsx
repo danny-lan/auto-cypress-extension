@@ -1,16 +1,16 @@
-import React, { FC, useState } from 'react';
-import { Box, Button, Flex, Heading } from '@chakra-ui/react';
-import { TPanelView } from './types';
-import { NetworkPanelContextProvider } from './NetworkPanel/context';
-import NetworkPanel from './NetworkPanel';
+import { HamburgerIcon, LinkIcon } from '@chakra-ui/icons';
+import { Button, Flex, Heading } from '@chakra-ui/react';
+import { FC, useState } from 'react';
+import ActionsPanel from './ActionsPanel';
+import { ActionsPanelContextProvider } from './ActionsPanel/context';
 import {
   provideActionsPanelContext,
   provideNetworkPanelContext,
 } from './hooks';
-import { ActionsPanelContextProvider } from './ActionsPanel/context';
-import ActionsPanel from './ActionsPanel';
-import { HamburgerIcon, LinkIcon } from '@chakra-ui/icons';
+import NetworkPanel from './NetworkPanel';
+import { NetworkPanelContextProvider } from './NetworkPanel/context';
 import TestPanel from './TestPanel';
+import { TPanelView } from './types';
 
 const Wrapper: FC = () => {
   const networkPanelState = provideNetworkPanelContext();
@@ -47,8 +47,10 @@ const Wrapper: FC = () => {
             <ActionsPanel setView={setView} />
           ) : view === 'network' ? (
             <NetworkPanel setView={setView} />
-          ) : (
+          ) : view === 'test' ? (
             <TestPanel />
+          ) : (
+            'unknown view'
           )}
         </Flex>
       </NetworkPanelContextProvider>

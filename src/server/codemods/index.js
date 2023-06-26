@@ -4,16 +4,20 @@ const fs = require('fs');
 const diff = require('diff');
 const { execSync } = require('child_process');
 const { stringTransformer } = require('./strategies');
-const { checkAndAddTestIdImport } = require('./import');
+const {
+  checkAndAddTestIdImport,
+  checkAndAddConstantVariable,
+} = require('./import');
+const { BASE_PATH } = require('../constants');
 
 const crypto = require('crypto-js');
 
 function getStableTestId(filepath, props) {
-  const sourceFileName = filepath.split('/').slice(-1)?.[0]?.split('.')?.[0]
+  const sourceFileName = filepath.split('/').slice(-1)?.[0]?.split('.')?.[0];
 
   const str = JSON.stringify(props, Object.keys(props).sort());
-  const hash = crypto.SHA256(str)
-  return `${sourceFileName}-${hash.toString()}`
+  const hash = crypto.SHA256(str);
+  return `${sourceFileName}-${hash.toString()}`;
 }
 // thanks chatgpt
 const runDiffCommand = (contentA, contentB) => {
@@ -44,7 +48,6 @@ const runPatchCommand = (filepath, patch) => {
   return response;
 };
 
-
 const printer = ts.createPrinter({
   newLine: ts.NewLineKind.LineFeed,
   removeComments: false,
@@ -53,9 +56,8 @@ const printer = ts.createPrinter({
 const applyStrategies = ({ sourceFile, props = {}, testId }) => {
   const hasAppliedStrategyRef = { current: false };
 
-  
   const result = ts.transform(sourceFile, [
-    stringTransformer({ hasAppliedStrategyRef, props, testId  }),
+    stringTransformer({ hasAppliedStrategyRef, props, testId }),
   ]);
 
   if (hasAppliedStrategyRef.current) {
@@ -65,7 +67,7 @@ const applyStrategies = ({ sourceFile, props = {}, testId }) => {
   return { newSourceFile: sourceFile, hasAppliedStrategy: false };
 };
 
-const generateCode = ({ filepath, props }) => {
+const generateCodeConstantFile = ({ filepath, testId }) => {
   const src = fs.readFileSync(filepath, { encoding: 'utf-8' });
 
   const sourceFile = ts.createSourceFile(
@@ -75,15 +77,39 @@ const generateCode = ({ filepath, props }) => {
     true,
     ts.ScriptKind.TSX
   );
-  const testId = getStableTestId(filepath, props);
+
+  const newSourceFile = checkAndAddConstantVariable(sourceFile, testId);
+
+  const newCode = prettier.format(printer.printFile(newSourceFile), {
+    singleQuote: true,
+    parser: 'typescript',
+    arrowParens: 'avoid',
+    trailingComma: 'es5',
+  });
+
+  return {
+    src,
+    newCode,
+  };
+};
+
+const generateCode = ({ filepath, props, testId }) => {
+  const src = fs.readFileSync(filepath, { encoding: 'utf-8' });
+
+  const sourceFile = ts.createSourceFile(
+    'x.tsx',
+    src,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX
+  );
+
   let { newSourceFile, hasAppliedStrategy } = applyStrategies({
     testId,
     sourceFile,
     props,
   });
 
-  console.log(newSourceFile)
-  
   if (hasAppliedStrategy) {
     newSourceFile = checkAndAddTestIdImport(newSourceFile);
   }
@@ -96,15 +122,19 @@ const generateCode = ({ filepath, props }) => {
   });
   return {
     src,
-    newCode
-  }
- 
+    newCode,
+  };
 };
 
-const generatePatch = ({ filepath, props}) => {
-  const {src, newCode} = generateCode({filepath, props})
+const generatePatch = ({ filepath, props, testId }) => {
+  const { src, newCode } = generateCode({ filepath, props, testId });
   return runDiffCommand(src, newCode);
-}
+};
+
+const generateConstantFilePatch = ({ filepath, testId }) => {
+  const { src, newCode } = generateCodeConstantFile({ filepath, testId });
+  return runDiffCommand(src, newCode);
+};
 
 const applyPatch = ({ filepath, patch }) => {
   if (!patch) return;
@@ -113,6 +143,7 @@ const applyPatch = ({ filepath, patch }) => {
 
 module.exports = {
   generateCode,
+  generateConstantFilePatch,
   generatePatch,
   applyPatch,
 };

@@ -48,36 +48,82 @@ export type TNetworkPanelContext = {
   view: TNetworkPanelView;
 };
 
+// thanks chatgpt
+export type TClickAction = {
+  type: 'click';
+  sourceFile: string;
+  details: { nodes: any[]; props: Record<string, any> };
+  tagName: string;
+};
+
+export type TKeyboardAction = {
+  type: 'keyboard';
+  details?: { nodes: any[]; props: Record<string, any> };
+  tagName?: string;
+  text: string;
+};
+
+export type TVisitAction = {
+  type: 'visit';
+  url: string;
+};
+
+export type TAssertExistsAction = {
+  type: 'assertExists';
+  sourceFile: string;
+  tagName: string;
+  details: { nodes: any[]; props: Record<string, any> };
+};
+
+export type TAssertTextAction = {
+  type: 'assertText';
+  assertContainsText: string;
+  sourceFile: string;
+  tagName: string;
+  details: { nodes: any[]; props: Record<string, any> };
+};
+
 export type TAction =
-  | {
-      type: 'click';
-      sourceFile?: string;
-      details?: { nodes: any[]; props: Record<string, any> };
-      tagName: string;
-    }
-  | {
-      type: 'keyboard';
-      text: string;
-    }
-  | {
-      type: 'visit';
-      url: string;
-    }
-  | {
-      type: 'assert';
-      assertType: 'exists';
-      sourceFile?: string;
-      tagName?: string;
-      details?: { nodes: any[]; props: Record<string, any> };
-    }
-  | {
-      type: 'assert';
-      assertType: 'contains';
-      assertContainsText: string;
-      sourceFile?: string;
-      tagName?: string;
-      details?: { nodes: any[]; props: Record<string, any> };
-    };
+  | TClickAction
+  | TKeyboardAction
+  | TVisitAction
+  | TAssertExistsAction
+  | TAssertTextAction;
+
+// these are the items used in the prompt, which is different to TAction, which is used to populate the list of acitons
+// See: `actionToPromptItem()` in util.ts
+// thanks chatgpt
+type TClickItem = {
+  type: 'click';
+  testId: string;
+  tagName: string;
+};
+
+type TAssertTextItem = {
+  type: 'assertText';
+  text: string;
+  testId: string;
+  tagName: string;
+};
+
+type TAssertExistsItem = {
+  type: 'assertExists';
+  testId: string;
+  tagName: string;
+};
+
+type TKeyboardItem = {
+  type: 'keyboard';
+  testId: string;
+  text: string;
+  tagName: string;
+};
+
+export type TItem =
+  | TClickItem
+  | TAssertTextItem
+  | TAssertExistsItem
+  | TKeyboardItem;
 
 export type TActionsPanelContext = {
   actions: TAction[];

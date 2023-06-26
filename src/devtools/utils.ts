@@ -1,8 +1,17 @@
+import crypto from 'crypto-js';
 import get from 'lodash/get';
 import writeTestPrompt from './prompts/cypressTest';
 import interceptPrompt from './prompts/intercept';
-import { TNetworkRequest } from './types';
-import crypto from 'crypto-js';
+import {
+  TAction,
+  TAssertExistsAction,
+  TAssertTextAction,
+  TClickAction,
+  TItem,
+  TKeyboardAction,
+  TNetworkRequest,
+  TVisitAction,
+} from './types';
 
 export function getTerminalFieldPaths(obj: any, prefix = ''): string[] {
   let paths: string[] = [];
@@ -133,24 +142,18 @@ export async function requestNetworkInterceptFromOpenAI(
 //  url:        '/hub/apps/',
 //  intercepts: 'cy.intercept("blah blah")',
 //  items       "[
-//                 { "type": "assertExists", "data-testid": "create-app-button" },
-//                 { "type": "assertText", "data-testid": "create-app-button", "textContent": "Create App" },
-//                 { "type": "click", "data-testid": "create-app-button" },
-//                 { "type": "assertExists", "data-testid": "create-app-input" },
-//                 { "type": "keystroke", "data-testid": "create-app-input", "value": "a" },
+//                 { "type": "assertExists", "testId": "create-app-button", "tagName": "BUTTON" },
+//                 { "type": "assertText", "testId": "create-app-button", "text": "Create App", "tagName": "BUTTON" },
+//                 { "type": "click", "testId": "create-app-button", "tagName": "BUTTON" },
+//                 { "type": "assertExists", "testId": "create-app-input", "tagName": "BUTTON" },
+//                 { "type": "keystroke", "testId": "create-app-input", "text": "abc", "tagName": "INPUT" },
 //              ]"
 
 export async function generateCypressTestFromOpenAI(params: {
   title: string;
   url: string;
   intercepts: string;
-  items: {
-    type: string;
-    'data-testid': string;
-    textContent: string;
-    value: string;
-    tagName: string;
-  }[];
+  items: TItem[];
 }) {
   const prompt = writeTestPrompt(params);
   console.log(prompt);
@@ -183,7 +186,7 @@ export async function requestFromOpenAI({
   return response;
 }
 
-export async function applyChanges(actions: any[]) {
+export async function applyChanges(actions: (TAction & { testId: string })[]) {
   const response = await fetch(`http://localhost:3010/apply-code-changes`, {
     method: 'POST',
     headers: {
@@ -207,10 +210,83 @@ export const sendEvent = (actionName: string, payload?: any) => {
   chrome.runtime.sendMessage({ action: actionName, payload });
 };
 
-function getStableTestId(filepath: string, props: any) {
+export function getStableTestId(filepath: string, props: any) {
   const sourceFileName = filepath.split('/').slice(-1)?.[0]?.split('.')?.[0];
 
   const str = JSON.stringify(props, Object.keys(props).sort());
   const hash = crypto.SHA256(str);
-  return `${sourceFileName}-${hash.toString()}`;
+  return `${sourceFileName}${hash.toString().substr(0, 7)}`;
 }
+
+// thanks chatgpt
+export function isClickAction(action: TAction): action is TClickAction {
+  return action.type === 'click';
+}
+
+export function isKeyboardAction(action: TAction): action is TKeyboardAction {
+  return action.type === 'keyboard';
+}
+
+export function isVisitAction(action: TAction): action is TVisitAction {
+  return action.type === 'visit';
+}
+
+export function isAssertExistsAction(
+  action: TAction
+): action is TAssertExistsAction {
+  return action.type === 'assertExists';
+}
+
+export function isAssertTextAction(
+  action: TAction
+): action is TAssertTextAction {
+  return action.type === 'assertText';
+}
+
+export const actionToPromptItem = (action: TAction): TItem => {
+  if (isClickAction(action)) {
+    const { type, sourceFile, details, tagName } = action;
+    const testId = getStableTestId(sourceFile, details.props);
+
+    return {
+      type,
+      testId,
+      tagName,
+    };
+  } else if (isKeyboardAction(action)) {
+    // keyboard is not supported yet since we need to store the sourceFile of a keyboard event =(
+    // so we need to figure out what to do here...
+    throw new Error('keyboard action not supported');
+    // const { type, details, tagName, text } = action;
+    // const testId = getStableTestId(sourceFile, details.props);
+
+    // return {
+    //   type,
+    //   tagName,
+    //   text,
+    //   testId,
+    // };
+  } else if (isAssertExistsAction(action)) {
+    const { type, sourceFile, tagName, details } = action;
+    const testId = getStableTestId(sourceFile, details.props);
+
+    return {
+      type,
+      testId,
+      tagName,
+    };
+  } else if (isAssertTextAction(action)) {
+    const { type, assertContainsText, sourceFile, tagName, details } = action;
+    const testId = getStableTestId(sourceFile, details.props);
+
+    return {
+      type,
+      testId,
+      tagName,
+      text: assertContainsText,
+    };
+  }
+
+  // Handle cases where the action does not match any specific type
+  throw new Error(`Unknown action type ${action.type}`);
+};

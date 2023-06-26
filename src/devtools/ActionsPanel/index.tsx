@@ -42,21 +42,21 @@ const ActionsPanel: React.FC<{
         </Box>
       );
     }
-    if (action.type === 'assert' && action.assertType === 'exists') {
+    if (action.type === 'assertExists') {
       return (
         <Box borderLeft={`8px solid ${theme.colors.green[300]}`} p={2} mb={2}>
           <Text fontWeight="bold" mb={1}>
-            {action.type} {action.assertType}
+            assert element exists
           </Text>
           <Text>{action.sourceFile}</Text>
         </Box>
       );
     }
-    if (action.type === 'assert' && action.assertType === 'contains') {
+    if (action.type === 'assertText') {
       return (
         <Box borderLeft={`8px solid ${theme.colors.green[300]}`} p={2} mb={2}>
           <Text fontWeight="bold" mb={1}>
-            {action.type} element {action.assertType}
+            assert element contains
           </Text>
           <Text>"{action.assertContainsText}"</Text>
         </Box>

@@ -3,37 +3,32 @@ import {
   Code,
   Flex,
   FormControl,
-  FormLabel,
   Input,
   InputGroup,
-  InputRightElement,
 } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useActionsPanelContext } from '../ActionsPanel/context';
 import { useNetworkPanelContext } from '../NetworkPanel/context';
 import writeTestPrompt from '../prompts/cypressTest';
-import { applyChanges, requestFromOpenAI } from '../utils';
+import { actionToPromptItem, applyChanges, requestFromOpenAI } from '../utils';
 
 const TestPanel = () => {
   const { intercepts } = useNetworkPanelContext();
-  const { actions } = useActionsPanelContext();
+  const { actions: _actions } = useActionsPanelContext();
 
   const [title, setTitle] = useState('');
   const [code, setCode] = useState('');
   const generateTestSuite = async () => {
-    const url = actions[0].type === 'visit' ? actions[0].url : '';
-    const items = actions.slice(1).map(a => {
-      // @ts-expect-error
-      const { details, sourceFile } = a;
-      return {
-        type: a.type,
-        // test id is hard to get cuz this is from reading the source files.
-        'data-testid': '???',
-        textContent: details?.props?.label || details?.props?.children,
-        value: '',
-        tagName: '',
-      };
-    });
+    let actions = [..._actions];
+    let url = 'https://localhost';
+
+    console.log('actions to generate', actions);
+    if (actions[0].type === 'visit') {
+      url = actions[0].url;
+      actions.shift();
+    }
+
+    const items = actions.map(action => actionToPromptItem(action));
 
     const prompt = writeTestPrompt({
       title,
@@ -41,6 +36,8 @@ const TestPanel = () => {
       intercepts: intercepts[0],
       items,
     });
+
+    console.log('prompt', prompt);
     const response = await requestFromOpenAI({
       openAIMethod: 'createChatCompletion',
       requestBody: {
@@ -50,11 +47,18 @@ const TestPanel = () => {
     });
 
     console.log(response);
-    setCode(response);
+    const actionsWithTestIds = actions.map((action, i) => ({
+      ...action,
+      testId: items[i].testId,
+    }));
+    const resp = await applyChanges(actionsWithTestIds);
+    console.log(resp);
+
+    // setCode(response);
   };
 
   const persistChanges = async () => {
-    const resp = await applyChanges(actions);
+    // const resp = await applyChanges(_actions);
   };
 
   return (
