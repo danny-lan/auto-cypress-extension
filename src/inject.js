@@ -81,7 +81,12 @@ const getDetailsFromFiberId = fiberId => {
 
   console.log = oldLog.bind(console);
   console.groupCollapsed = oldGroupCollapsed.bind(console);
-  return result;
+
+  const normalizedProps = normalizeProps(result.props);
+
+  return {
+    props: normalizedProps,
+  };
 };
 
 const getAllScriptsContents = async () => {
@@ -163,6 +168,33 @@ const safeDispatchEvent = (eventName, payload) => {
   );
 };
 
+const normalizeProps = (props, tagName) => {
+  const normalizedProps = Array.isArray(props)
+    ? props[0]?.props || props[0]
+    : props;
+
+  if (tagName === 'INPUT') {
+    delete normalizedProps.accept;
+    delete normalizedProps['aria-invalid'];
+    delete normalizedProps['autoFocus'];
+    delete normalizedProps['disabled'];
+    delete normalizedProps['error'];
+    delete normalizedProps['id'];
+    delete normalizedProps['placeholder'];
+    delete normalizedProps['readOnly'];
+    delete normalizedProps['tag'];
+    delete normalizedProps['type'];
+    delete normalizedProps['rightIcon'];
+    delete normalizedProps['leftIcon'];
+  }
+
+  if (normalizedProps.onChange) {
+    normalizedProps.onChange = 'some string';
+  }
+
+  return normalizedProps;
+};
+
 (async () => {
   const scriptContents = await getAllScriptsContents();
 
@@ -200,15 +232,9 @@ const safeDispatchEvent = (eventName, payload) => {
     console.log('sourceFile', sourceFile);
     console.log('details', details.props, details);
 
-    const normalizeProps = Array.isArray(details.props)
-      ? details.props[0]?.props || details.props[0]
-      : details.props;
-
     safeDispatchEvent('userClick', {
       sourceFile,
-      details: {
-        props: normalizeProps,
-      },
+      details,
       tagName: e.target.tagName,
     });
   });
