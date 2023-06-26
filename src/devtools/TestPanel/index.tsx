@@ -6,6 +6,7 @@ import {
   Input,
   InputGroup,
 } from '@chakra-ui/react';
+import { snakeCase } from 'lodash';
 import { useState } from 'react';
 import { useActionsPanelContext } from '../ActionsPanel/context';
 import { useNetworkPanelContext } from '../NetworkPanel/context';
@@ -73,12 +74,12 @@ const TestPanel = () => {
     const appsIdx = sourceSplit.indexOf('apps');
     let appRoot = sourceSplit;
     if (appsIdx > -1) {
-      appRoot = sourceSplit.slice(0, appsIdx + 2);
+      appRoot = sourceSplit.slice(0, appsIdx + 3);
     }
     const testLocation = [...appRoot, '__e2e__'];
 
     const writeTestResp = await writeFileContent(
-      `${testLocation.join('/')}/${title}`,
+      `${testLocation.join('/')}/${snakeCase(title)}.spec.js`,
       code
     );
     console.log(writeTestResp);
