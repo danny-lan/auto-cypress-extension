@@ -44,7 +44,32 @@ const matchPropsInNodeStrategy = ({ node, props }) => {
   return false;
 };
 
+const matchAllPropsInSomeNodeStrategy = ({ node, props }) => {
+  const { children, ...propsToFind } = props;
+  if (propsToFind.length === 0) return false;
+  if (ts.isJsxOpeningElement(node) || ts.isJsxSelfClosingElement(node)) {
+    const nodeProps = node.attributes.properties.map(
+      prop => prop?.name?.escapedText
+    );
+    const propLabelsToFind = Object.keys(propsToFind);
+    return propLabelsToFind.every(propLabel =>
+      Boolean(
+        nodeProps.some(nodeProp => {
+          return propLabel === nodeProp;
+        })
+      )
+    );
+  }
+  return false;
+};
+
 const transformNode = ({ node, testId }) => {
+  const hasDataTestId = node.attributes.properties.some(
+    property => property?.name?.escapedText === 'data-testid'
+  );
+  if (hasDataTestId) {
+    return;
+  }
   node.attributes.properties.push(
     ts.createJsxAttribute(
       ts.createIdentifier('data-testid'),
@@ -59,7 +84,11 @@ const transformNode = ({ node, testId }) => {
   );
 };
 
-const strategies = [findTextInChildrenStrategy, matchPropsInNodeStrategy];
+const strategies = [
+  findTextInChildrenStrategy,
+  matchPropsInNodeStrategy,
+  matchAllPropsInSomeNodeStrategy,
+];
 
 // Find and modify the identifier within the AST node
 const stringTransformer =
