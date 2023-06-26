@@ -55,7 +55,7 @@ export async function getFileContent(filePath: string) {
 
 export async function writeFileContent(filePath: string, content: string) {
   try {
-    const response = await fetch(`http://localhost:3000/file`, {
+    const response = await fetch(`http://localhost:3010/file`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

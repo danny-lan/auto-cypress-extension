@@ -189,7 +189,7 @@ export function provideActionsPanelContext(): TActionsPanelContext {
           ]);
           break;
         }
-        case 'userAssertExists': {
+        case 'userAssertExist': {
           const { details, sourceFile, tagName } =
             JSON.parse(stringifiedPayload);
           const testId =

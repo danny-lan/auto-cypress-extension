@@ -10,7 +10,12 @@ import { useState } from 'react';
 import { useActionsPanelContext } from '../ActionsPanel/context';
 import { useNetworkPanelContext } from '../NetworkPanel/context';
 import writeTestPrompt from '../prompts/cypressTest';
-import { actionToPromptItem, applyChanges, requestFromOpenAI } from '../utils';
+import {
+  actionToPromptItem,
+  applyChanges,
+  requestFromOpenAI,
+  writeFileContent,
+} from '../utils';
 
 const TestPanel = () => {
   const { intercepts } = useNetworkPanelContext();
@@ -47,6 +52,15 @@ const TestPanel = () => {
     });
 
     console.log(response);
+    setCode(response.choices[0].message.content);
+  };
+
+  const persistChanges = async () => {
+    let actions = [..._actions];
+    if (actions[0].type === 'visit') {
+      actions.shift();
+    }
+    const items = actions.map(action => actionToPromptItem(action));
     const actionsWithTestIds = actions.map((action, i) => ({
       ...action,
       testId: items[i].testId,
@@ -54,21 +68,37 @@ const TestPanel = () => {
     const resp = await applyChanges(actionsWithTestIds);
     console.log(resp);
 
-    // setCode(response);
-  };
+    // @ts-expect-error
+    const sourceSplit = actions[0].sourceFile.split('/');
+    const appsIdx = sourceSplit.indexOf('apps');
+    let appRoot = sourceSplit;
+    if (appsIdx > -1) {
+      appRoot = sourceSplit.slice(0, appsIdx + 2);
+    }
+    const testLocation = [...appRoot, '__e2e__'];
 
-  const persistChanges = async () => {
-    // const resp = await applyChanges(_actions);
+    const writeTestResp = await writeFileContent(
+      `${testLocation.join('/')}/${title}`,
+      code
+    );
+    console.log(writeTestResp);
   };
 
   return (
     <div>
       <FormControl>
         <InputGroup>
-          <Input type="text" placeholder="Test Name" />
+          <Input
+            type="text"
+            placeholder="Test Name"
+            onChange={e => setTitle(e.currentTarget.value)}
+          />
         </InputGroup>
       </FormControl>
-      <Button onClick={generateTestSuite}>Generate Test</Button>
+      <Flex>
+        <Button onClick={generateTestSuite}>Generate Test</Button>
+        {code && <Button onClick={persistChanges}>Save Test</Button>}
+      </Flex>
       {code && (
         <Flex w="100%" h="10rem" direction="column">
           <Code fontSize="xs" maxW="100%" whiteSpace="break-spaces">
