@@ -163,6 +163,7 @@ export function provideActionsPanelContext(): TActionsPanelContext {
               {
                 type: 'keyboard',
                 text,
+                sourceFile: lastAction.sourceFile,
                 tagName: lastAction.tagName,
                 testId: lastAction.testId,
               },
