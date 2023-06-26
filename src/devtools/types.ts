@@ -59,6 +59,7 @@ export type TClickAction = {
 
 export type TKeyboardAction = {
   type: 'keyboard';
+  sourceFile: string;
   details?: { nodes: any[]; props: Record<string, any> };
   tagName: string;
   text: string;
