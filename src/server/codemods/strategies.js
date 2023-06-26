@@ -11,15 +11,7 @@ const isJsxTextWithString = (node, string) => {
 
 const findTextInChildrenStrategy = ({ node, props }) => {
   if (!props.children) return false;
-  if (isJsxTextWithString(node, props.children)) {
-    const hasDataTestId = node.openingElement.attributes.properties.some(
-      property => property?.name?.escapedText === 'data-testid'
-    );
-    if (true || !hasDataTestId) {
-      return true;
-    }
-  }
-  return false;
+  return isJsxTextWithString(node, props.children);
 };
 
 const matchPropsInNodeStrategy = ({ node, props }) => {
