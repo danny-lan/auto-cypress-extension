@@ -10,6 +10,8 @@ const {
   generateCode,
 } = require('./codemods');
 const { createInterface } = require('readline');
+// Place API key in .env.local
+require('dotenv').config({ path: '.env.local' });
 const { BASE_PATH } = require('./constants');
 
 // const rl = createInterface({
@@ -19,8 +21,9 @@ const { BASE_PATH } = require('./constants');
 
 // rl.question('Enter OpenAI key:', apiKey => {
 const configuration = new Configuration({
-  // apiKey: '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',
-  apiKey: 'i broke this api key by committing it to a public repo :sad:',
+  // DO NOT PUBLISH API KEY TO PUBLIC REPO,
+  // OPENAI WILL REVOKE YOUR KEY !!!
+  apiKey: process.env.API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 
